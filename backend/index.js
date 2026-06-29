@@ -4,6 +4,7 @@ import 'dotenv/config'
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes.js'
+import userRoutes from './routes/user.routes.js'
 
 const app = express();
 const PORT = process.env.PORT
@@ -16,6 +17,7 @@ app.use(cors({
 }))
 
 app.use('/api/auth', authRoutes)
+app.use('/api/users', userRoutes)
 
 async function startServer() {
     try {

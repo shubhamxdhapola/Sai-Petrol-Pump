@@ -30,7 +30,7 @@ export const authenticate = async (req, res, next) => {
 export const isAdmin = (req, res, next) => {
     try {
         if (req.user && req.user.role == 'admin') next()
-        else res.status(401).json({ message: "Not authorized as admin" })
+        else res.status(403).json({ message: "Not authorized as admin" })
     } catch (error) {
         console.log("Error in isAdmin middleware : ", err)
         res.status(500).json({ message: "Internal server error!" })
