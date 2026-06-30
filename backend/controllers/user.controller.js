@@ -1,4 +1,4 @@
-import User from "../models/User.js"
+import User from "../models/user.model.js"
 
 export const createUser = async (req, res) => {
     try {
@@ -38,7 +38,7 @@ export const getUser = async (req, res) => {
         const userId = req.params.id
 
         if (!userId) {
-            return res.status(401).json({ message: "No user id provided" })
+            return res.status(401).json({ message: "User id not provided" })
         }
 
         const user = await User.findById(userId).select('-password -tokenVersion');
@@ -79,7 +79,7 @@ export const updateUser = async (req, res) => {
         const updates = {}
         if (name) updates.name = name
         if (phone) updates.phone = phone
-        if (isActive && typeof isActive !== 'undefined') updates.isActive = isActive
+        if (typeof isActive !== 'undefined') updates.isActive = isActive
 
         const updatedUser = await User.findByIdAndUpdate(
             userId, updates,
@@ -101,7 +101,7 @@ export const deleteUser = async (req, res) => {
     try {
         const userId = req.params.id
         if (!userId) {
-            return res.status(401).json({ message: "No user id provided" })
+            return res.status(401).json({ message: "User id not provided" })
         }
 
         const user = await User.findByIdAndDelete(userId)
