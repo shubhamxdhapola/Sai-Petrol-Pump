@@ -1,12 +1,9 @@
+import mongoose from "mongoose"
 import User from "../models/user.model.js"
 
 export const createUser = async (req, res) => {
     try {
         const { name, phone, password } = req.body
-
-        if (!name || !phone || !password) {
-            return res.status(400).json({ message: "All fields are required" })
-        }
 
         const user = await User.findOne({ phone })
         if (user) {
@@ -37,11 +34,11 @@ export const getUser = async (req, res) => {
     try {
         const userId = req.params.id
 
-        if (!userId) {
-            return res.status(401).json({ message: "User id not provided" })
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid user id" });
         }
 
-        const user = await User.findById(userId).select('-password -tokenVersion');
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" })
         }
@@ -56,7 +53,7 @@ export const getUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
     try {
-        const users = await User.find({ role: 'employee' }).select('-password -tokenVersion')
+        const users = await User.find({ role: 'employee' })
         return res.status(200).json(users)
     } catch (error) {
         console.log("Error in getUsers controller : ", error)
@@ -69,6 +66,10 @@ export const updateUser = async (req, res) => {
         const { name, phone, isActive } = req.body
         const userId = req.params.id
 
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid user id" });
+        }
+
         if (phone) {
             const existingUser = await User.findOne({ phone, _id: { $ne: userId } })
             if (existingUser) {
@@ -79,12 +80,12 @@ export const updateUser = async (req, res) => {
         const updates = {}
         if (name) updates.name = name
         if (phone) updates.phone = phone
-        if (typeof isActive !== 'undefined') updates.isActive = isActive
+        if (isActive !== undefined) updates.isActive = isActive
 
         const updatedUser = await User.findByIdAndUpdate(
             userId, updates,
             { runValidators: true, returnDocument: 'after' }
-        ).select('-password -tokenVersion')
+        )
 
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" })
@@ -100,8 +101,9 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
     try {
         const userId = req.params.id
-        if (!userId) {
-            return res.status(401).json({ message: "User id not provided" })
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid user id" });
         }
 
         const user = await User.findByIdAndDelete(userId)

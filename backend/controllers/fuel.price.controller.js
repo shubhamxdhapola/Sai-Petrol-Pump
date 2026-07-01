@@ -27,14 +27,6 @@ export const createPrice = async (req, res) => {
     try {
         const { price, fuelType } = req.body
 
-        if (!price || fuelType === undefined) {
-            return res.status(400).json({ message: "All fields are required" })
-        }
-
-        if (price <= 0) {
-            return res.status(400).json({ message: "Price must be greater than 0" });
-        }
-
         const latestPrice = await FuelPrice.findOne({
             fuelType,
         }).sort({ effectiveFrom: -1 });
@@ -59,7 +51,13 @@ export const createPrice = async (req, res) => {
 
 export const getPriceHistory = async (req, res) => {
     try {
-        const { fuelType } = req.query;
+        let { fuelType } = req.query;
+
+        if(fuelType) fuelType = fuelType.toUpperCase()
+
+        if(fuelType !== 'PETROL' && fuelType !== 'DIESEL') {
+            return res.status(400).json({message : "Invalid fuel type"})
+        }
 
         const filter = {};
         if (fuelType) {

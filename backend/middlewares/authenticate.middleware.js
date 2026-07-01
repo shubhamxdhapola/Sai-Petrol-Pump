@@ -12,7 +12,7 @@ export const authenticate = async (req, res, next) => {
             if (err) {
                 return res.status(401).json({ message: "Unauthorized - Invalid token" })
             }
-            const user = await User.findById(decodedToken.userId).select('-password');
+            const user = await User.findById(decodedToken.userId).select('+tokenVersion');
 
             if (decodedToken.tokenVersion !== user.tokenVersion) {
                 return res.status(401).json({ message: "Session expired, Login again" })

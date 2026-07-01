@@ -23,6 +23,12 @@ app.use('/api/users', userRoutes)
 app.use('/api/tanks', tankRoutes)
 app.use('/api/fuel-prices', fuelPriceRoutes)
 
+app.use((req, res) => {
+    return res.status(404).json({ 
+        message: "Route not found" 
+    })
+})
+
 async function startServer() {
     try {
         await connectDB();

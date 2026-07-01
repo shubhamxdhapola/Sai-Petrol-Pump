@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import Tank from "../models/tank.model.js"
 
 export const getTanks = async (req, res) => {
@@ -13,8 +14,8 @@ export const getTanks = async (req, res) => {
 export const getTank = async (req, res) => {
     try {
         const tankId = req.params.id
-        if (!tankId) {
-            return res.status(400).json({ message: "Tank id not provided" })
+        if (!mongoose.Types.ObjectId.isValid(tankId)) {
+            return res.status(400).json({ message: "Invalid tank id" });
         }
 
         const tank = await Tank.findById(tankId);
@@ -30,20 +31,17 @@ export const getTank = async (req, res) => {
 
 export const createTank = async (req, res) => {
     try {
-        const { name, fuelType, capacity, currentQuantity } = req.body
+        const { name, tankNumber, fuelType, capacity, currentQuantity } = req.body
 
-        if (!name || !fuelType || !capacity || !currentQuantity) {
-            return res.status(400).json({ message: "All fields are required" })
+        const existingTank = await Tank.findOne({ tankNumber })
+        if (existingTank) {
+            return res.status(409).json({ message: "Tank number already exists" })
         }
 
-        if (currentQuantity > capacity) {
-            return res.status(400).json({ 
-                message: "Current quantity shouldn't exceed the capacity" 
-            })
-        }
-
-        const tank = await Tank.create({ name, fuelType, capacity, currentQuantity })
-        return res.status(201).json({ tank, message: "Tank created successfully" })
+        const newTank = await Tank.create({
+            name, tankNumber, fuelType, capacity, currentQuantity
+        })
+        return res.status(201).json({ newTank, message: "Tank created successfully" })
 
     } catch (error) {
         console.log("Error in createTank controller : ", error)
@@ -53,15 +51,19 @@ export const createTank = async (req, res) => {
 
 export const updateTank = async (req, res) => {
     try {
-        const { name, capacity, isActive } = req.body;
+        const { name, tankNumber, capacity, isActive } = req.body;
         const tankId = req.params.id
+
+        if (!mongoose.Types.ObjectId.isValid(tankId)) {
+            return res.status(400).json({ message: "Invalid tank id" });
+        }
 
         const tank = await Tank.findById(tankId)
         if (!tank) {
             return res.status(404).json({ message: "Tank not found" });
         }
 
-        if (capacity && capacity < tank?.currentQuantity) {
+        if (capacity !== undefined && capacity < tank?.currentQuantity) {
             return res.status(400).json({
                 message: "Capacity cannot be less than the current fuel quantity"
             })
@@ -69,21 +71,25 @@ export const updateTank = async (req, res) => {
 
         const updates = {}
 
+        if (tankNumber) {
+            const existingTank = await Tank.findOne({ tankNumber, _id: { $ne: tankId }, });
+            if (existingTank) {
+                return res.status(409).json({ message: "Tank number already exists", });
+            }
+            updates.tankNumber = tankNumber;
+        }
         if (name) updates.name = name;
-        if (capacity) updates.capacity = capacity
-        if (typeof isActive != 'undefined') updates.isActive = isActive
+        if (capacity !== undefined) updates.capacity = capacity
+        if (isActive != undefined) updates.isActive = isActive
 
         const updatedTank = await Tank.findByIdAndUpdate(
             tankId, updates,
             { runValidators: true, returnDocument: 'after' }
         )
 
-        if (updatedTank) {
-            return res.status(200).json({ 
-                updatedTank, message: "Tank updated successfully" 
-            })
-        }
-
+        return res.status(200).json({
+            updatedTank, message: "Tank updated successfully"
+        })
     } catch (error) {
         console.log("Error in updateTank controller : ", error)
         return res.status(500).json({ message: "Internal server error" })
@@ -93,15 +99,16 @@ export const updateTank = async (req, res) => {
 export const deleteTank = async (req, res) => {
     try {
         const tankId = req.params.id
-        if(!tankId) {
-            return res.status(400).json({message : "Tank not found"})
+
+        if (!mongoose.Types.ObjectId.isValid(tankId)) {
+            return res.status(400).json({ message: "Invalid tank id" });
         }
 
         const tank = await Tank.findByIdAndDelete(tankId)
-        if(!tank) {
-            return res.status(404).json({message : "Tank not found"})
+        if (!tank) {
+            return res.status(404).json({ message: "Tank not found" })
         }
-        return res.status(200).json({message : "Tank deleted successfully"})
+        return res.status(200).json({ message: "Tank deleted successfully" })
 
     } catch (error) {
         console.log("Error in deleteTank controller : ", error)

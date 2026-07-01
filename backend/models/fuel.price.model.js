@@ -19,6 +19,5 @@ const fuelPriceSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-
 const FuelPrice = mongoose.model('FuelPrice', fuelPriceSchema)
 export default FuelPrice
