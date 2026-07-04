@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
 import tankRoutes from './routes/tank.routes.js'
 import fuelPriceRoutes from './routes/fuel.price.route.js'
+import machineRoutes from './routes/machine.routes.js'
 
 const app = express();
 const PORT = process.env.PORT
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/tanks', tankRoutes)
 app.use('/api/fuel-prices', fuelPriceRoutes)
+app.use('/api/machines', machineRoutes)
 
 app.use((req, res) => {
     return res.status(404).json({ 
