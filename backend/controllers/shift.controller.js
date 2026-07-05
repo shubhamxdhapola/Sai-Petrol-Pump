@@ -406,32 +406,43 @@ export const getShift = async (req, res) => {
             return res.status(400).json({ message: "Invalid shift id" });
         }
 
-        const shift = await Shift.findById(shiftId)
-            .populate("employeeId", "name phone")
-            .populate("machineId", "name machineNumber")
-            .populate({
+        const shift = await Shift.findById(shiftId);
+
+        if (!shift) {
+            return res.status(404).json({
+                message: "Shift not found"
+            });
+        }
+
+        if (
+            req.user.role === "employee" &&
+            shift.employeeId.toString() !== req.user._id.toString()
+        ) {
+            return res.status(403).json({
+                message: "You are not authorized to view this shift"
+            });
+        }
+    
+        await shift.populate([
+            {
+                path: "employeeId",
+                select: "name phone"
+            },
+            {
+                path: "machineId",
+                select: "name machineNumber"
+            },
+            {
                 path: "nozzles.nozzleId",
                 select: "nozzleNumber tankId",
                 populate: {
                     path: "tankId",
                     select: "name tankNumber fuelType"
                 }
-            });
+            }
+        ]);
 
-        if (!shift) {
-            return res.status(404).json({ message: "Shift not found" });
-        }
-
-        if (
-            req.user.role === "employee" &&
-            shift.employeeId._id.toString() !== req.user._id.toString()
-        ) {
-            return res.status(403).json({
-                message: "You are not authorized to view this shift"
-            });
-        }
         return res.status(200).json(shift);
-
     } catch (error) {
         console.log("Error in getShift controller :", error);
         return res.status(500).json({ message: "Internal server error" });
