@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const startShiftSchema = z.object({
-    machineId: z.string(),
+    machineId: z.string({error : "Machine id is required"}),
 
     nozzleIds: z
         .array(z.string())

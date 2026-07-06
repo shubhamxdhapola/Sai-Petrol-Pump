@@ -23,7 +23,6 @@ const shiftSchema = new mongoose.Schema({
         },
         pricePerLitre: {
             type: Number,
-            required: true,
             min: 0
         },
 

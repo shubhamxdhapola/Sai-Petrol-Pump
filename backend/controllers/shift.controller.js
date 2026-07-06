@@ -19,6 +19,12 @@ export const startShift = async (req, res) => {
             return res.status(400).json({ message: "Invalid machine id" });
         }
 
+        nozzleIds.forEach(nozzleId => {
+            if (!mongoose.Types.ObjectId.isValid(nozzleId)) {
+                return res.status(400).json({ message: "Invalid nozzle id" });
+            }
+        })
+
         // Verify if duplicate nozzle ids received
         if (new Set(nozzleIds).size !== nozzleIds.length) {
             return res.status(400).json({ message: "Duplicate nozzle selected" });
@@ -164,6 +170,12 @@ export const endShift = async (req, res) => {
             return res.status(400).json({ message: "Invalid shift id" });
         }
 
+        readings.forEach((reading) => {
+            if (!mongoose.Types.ObjectId.isValid(reading.nozzleId)) {
+                return res.status(400).json({ message: "Invalid nozzle id" });
+            }
+        })
+
         session.startTransaction();
 
         const shift = await Shift.findById(shiftId)
@@ -199,11 +211,11 @@ export const endShift = async (req, res) => {
             }
         }).populate("tankId").session(session);
 
-        const { petrol, diesel } = await getCurrentFuelPrices(session); // Get the lastest fuel prices
+        const { PETROL, DIESEL } = await getCurrentFuelPrices(session); // Get the lastest fuel prices
 
         const priceMap = new Map([ // Create a mapping of latest fuel prices e.g - FuelType : Price
-            ["PETROL", petrol.price],
-            ["DIESEL", diesel.price],
+            ["PETROL",  PETROL.price],
+            ["DIESEL", DIESEL.price],
         ]);
 
         const tankDeductions = new Map(); // This will be used to deduct the total sold fuel during the shift from each nozzle
@@ -219,7 +231,7 @@ export const endShift = async (req, res) => {
 
             if (!shiftNozzle) {
                 await session.abortTransaction();
-                return res.status(400).json({ message: "Invalid nozzle received" });
+                return res.status(400).json({ message: "This nozzle was not selected during shift creation" });
             }
 
             const nozzle = nozzles.find( // Verify the nozzle must exist in nozzle collection
@@ -342,8 +354,9 @@ export const endShift = async (req, res) => {
 export const getShifts = async (req, res) => {
     try {
 
-        const { status, employeeId, machineId, startDate, endDate } = req.query;
+        let { status, employeeId, machineId, startDate, endDate } = req.query;
 
+        status = status.toUpperCase();
         const filter = {};
 
         if (req.user.role === 'employee') {
@@ -422,7 +435,7 @@ export const getShift = async (req, res) => {
                 message: "You are not authorized to view this shift"
             });
         }
-    
+
         await shift.populate([
             {
                 path: "employeeId",
