@@ -12,10 +12,7 @@ const getCurrentFuelPrices = async (session = null) => {
             .session(session),
     ]);
 
-    return {
-        PETROL: petrol,
-        DIESEL: diesel,
-    };
+    return { PETROL: petrol, DIESEL: diesel };
 };
 
 export default getCurrentFuelPrices

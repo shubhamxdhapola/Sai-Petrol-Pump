@@ -124,6 +124,12 @@ export const updateNozzle = async (req, res) => {
             !mongoose.Types.ObjectId.isValid(nozzleId)) {
             return res.status(400).json({ message: "Invalid id" });
         }
+        
+        const machine = await Machine.findById(machineId);
+
+        if (!machine) {
+            return res.status(404).json({ message: "Machine not found", });
+        }
 
         const nozzle = await Nozzle.findOne({
             _id: nozzleId, machineId
@@ -131,6 +137,10 @@ export const updateNozzle = async (req, res) => {
 
         if (!nozzle) {
             return res.status(404).json({ message: "Nozzle not found" });
+        }
+
+        if (nozzle.isOccupied) {
+            return res.status(409).json({ message: "Cannot modify the occupied nozzle" })
         }
 
         const updates = {};
@@ -164,9 +174,13 @@ export const updateNozzle = async (req, res) => {
         }
 
         const updatedNozzle = await Nozzle.findByIdAndUpdate(
-            nozzleId, updates,
+            { _id: nozzleId, isOccupied: false }, updates,
             { runValidators: true, returnDocument: "after" }
         );
+
+        if (!updatedNozzle) {
+            return res.status(409).json({ message: "Nozzle is occupied" });
+        }
 
         return res.status(200).json({
             updatedNozzle, message: "Nozzle updated successfully"
@@ -187,12 +201,27 @@ export const deleteNozzle = async (req, res) => {
             return res.status(400).json({ message: "Invalid id" });
         }
 
-        const nozzle = await Nozzle.findOneAndDelete({
-            _id: nozzleId, machineId
-        });
+        const machine = await Machine.findById(machineId);
+
+        if (!machine) {
+            return res.status(404).json({ message: "Machine not found", });
+        }
+
+        const nozzle = await Nozzle.findById(nozzleId)
 
         if (!nozzle) {
             return res.status(404).json({ message: "Nozzle not found" });
+        }
+        if (nozzle.isOccupied) {
+            return res.status(409).json({ message: "Cannot delete the occupied nozzle" })
+        }
+
+        const deletedNozzle = await Nozzle.findOneAndDelete({
+            _id: nozzleId, machineId, isOccupied: false
+        });
+
+        if (!deletedNozzle) {
+            return res.status(409).json({ message: "Cannot delete an occupied nozzle" });
         }
 
         return res.status(200).json({ message: "Nozzle deleted successfully" });

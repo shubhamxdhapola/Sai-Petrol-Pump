@@ -15,6 +15,10 @@ export const startShift = async (req, res) => {
         const employeeId = req.user._id;
         const { machineId, nozzleIds } = req.body;
 
+        if (req.user.role === 'admin') {
+            return res.status(400).json({ message: "Admin is not allowed to start shift" })
+        }
+
         if (!mongoose.Types.ObjectId.isValid(machineId)) {
             return res.status(400).json({ message: "Invalid machine id" });
         }
@@ -116,7 +120,7 @@ export const startShift = async (req, res) => {
             nozzles: shiftNozzles
         }],
             { session }
-        );
+        )
 
         // Mark all selected nozzles as occupied
         await Nozzle.updateMany({
@@ -141,10 +145,13 @@ export const startShift = async (req, res) => {
                 path: "nozzles.nozzleId",
                 select: "nozzleNumber currentReading"
             }
-        ]);
+        ])
+
+        const shiftResponse = shift[0].toObject();
+        delete shiftResponse.totalAmount;
 
         return res.status(201).json({
-            shift: shift[0],
+            shift: shiftResponse,
             message: "Shift started successfully"
         });
 
@@ -176,6 +183,12 @@ export const endShift = async (req, res) => {
             }
         })
 
+        const nzlIds = readings.map((reading) => reading.nozzleId)
+
+        if (new Set(nzlIds).size !== nzlIds.length) {
+            return res.status(400).json({ message: "Duplicate nozzle received" });
+        }
+
         session.startTransaction();
 
         const shift = await Shift.findById(shiftId)
@@ -184,6 +197,10 @@ export const endShift = async (req, res) => {
         if (!shift) {
             await session.abortTransaction();
             return res.status(404).json({ message: "Shift not found" });
+        }
+
+        if (!shift.employeeId.equals(req.user._id) && req.user.role !== 'admin') {
+            return res.status(403).json({ message: "You are not allowed to end this shift" })
         }
 
         if (shift.status === "COMPLETED") {
@@ -214,7 +231,7 @@ export const endShift = async (req, res) => {
         const { PETROL, DIESEL } = await getCurrentFuelPrices(session); // Get the lastest fuel prices
 
         const priceMap = new Map([ // Create a mapping of latest fuel prices e.g - FuelType : Price
-            ["PETROL",  PETROL.price],
+            ["PETROL", PETROL.price],
             ["DIESEL", DIESEL.price],
         ]);
 
@@ -333,11 +350,20 @@ export const endShift = async (req, res) => {
                 path: "nozzles.nozzleId",
                 select: "nozzleNumber"
             }
-
         ]);
 
+        const shiftResponse = shift.toObject();
+
+        delete shiftResponse.totalAmount;
+
+        shiftResponse.nozzles = shiftResponse.nozzles.map(nozzle => {
+            delete nozzle.amount;
+            delete nozzle.pricePerLitre;
+            return nozzle;
+        });
+
         return res.status(200).json({
-            shift,
+            shift: shiftResponse,
             message: "Shift completed successfully"
         });
 
@@ -356,7 +382,6 @@ export const getShifts = async (req, res) => {
 
         let { status, employeeId, machineId, startDate, endDate } = req.query;
 
-        status = status.toUpperCase();
         const filter = {};
 
         if (req.user.role === 'employee') {
@@ -382,6 +407,7 @@ export const getShifts = async (req, res) => {
         }
 
         if (status) {
+            status = status.toUpperCase();
             const validStatus = ["ONGOING", "COMPLETED"];
             if (!validStatus.includes(status)) {
                 return res.status(400).json({ message: "Invalid status" });
@@ -396,7 +422,12 @@ export const getShifts = async (req, res) => {
             filter.machineId = machineId;
         }
 
+        const fields = req.user.role === 'admin'
+            ? ""
+            : "-totalAmount -nozzles.amount -nozzles.pricePerLitre"
+
         const shifts = await Shift.find(filter)
+            .select(fields)
             .populate("employeeId", "name phone")
             .populate("machineId", "name machineNumber")
             .sort({ startTime: -1 })
@@ -419,12 +450,14 @@ export const getShift = async (req, res) => {
             return res.status(400).json({ message: "Invalid shift id" });
         }
 
-        const shift = await Shift.findById(shiftId);
+        const fields = req.user.role === 'admin'
+            ? ""
+            : "-totalAmount -nozzles.amount -nozzles.pricePerLitre"
+
+        const shift = await Shift.findById(shiftId).select(fields);
 
         if (!shift) {
-            return res.status(404).json({
-                message: "Shift not found"
-            });
+            return res.status(404).json({ message: "Shift not found" });
         }
 
         if (

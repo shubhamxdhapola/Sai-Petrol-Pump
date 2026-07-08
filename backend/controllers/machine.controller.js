@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Machine from "../models/machine.model.js";
+import Nozzle from "../models/nozzle.model.js";
 
 export const getMachines = async (req, res) => {
     try {
@@ -69,6 +70,16 @@ export const updateMachine = async (req, res) => {
             return res.status(404).json({ message: "Machine not found", });
         }
 
+        const occupiedNozzle = await Nozzle.findOne({
+            machineId, isOccupied: true
+        })
+
+        if (occupiedNozzle) {
+            return res.status(409).json({
+                message: "Cannot modify machine while one or more nozzles are occupied",
+            });
+        }
+
         const updates = {};
 
         if (machineNumber) {
@@ -111,13 +122,33 @@ export const deleteMachine = async (req, res) => {
             return res.status(400).json({ message: "Invalid machine id" });
         }
 
-        const machine = await Machine.findByIdAndDelete(machineId);
+        const machine = await Machine.findById(machineId);
 
         if (!machine) {
             return res.status(404).json({ message: "Machine not found" });
         }
 
+        const occupiedNozzle = await Nozzle.findOne({
+            machineId, isOccupied: true,
+        });
+
+        if (occupiedNozzle) {
+            return res.status(409).json({
+                message: "Cannot delete machine while one or more nozzles are occupied",
+            });
+        }
+
+        const nozzleCount = await Nozzle.countDocuments({ machineId });
+
+        if (nozzleCount > 0) {
+            return res.status(409).json({
+                message: "Remove all nozzles before deleting this machine",
+            });
+        }
+
+        await Machine.findByIdAndDelete(machineId)
         return res.status(200).json({ message: "Machine deleted successfully" });
+
     } catch (error) {
         console.log("Error in deleteMachine controller : ", error)
         return res.status(500).json({ message: "Internal server error" })

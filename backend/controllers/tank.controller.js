@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import Tank from "../models/tank.model.js"
+import Nozzle from "../models/nozzle.model.js"
 
 export const getTanks = async (req, res) => {
     try {
@@ -63,6 +64,13 @@ export const updateTank = async (req, res) => {
             return res.status(404).json({ message: "Tank not found" });
         }
 
+        const occupiedNozzle = await Nozzle.findOne({ tankId, isOccupied: true })
+        if (occupiedNozzle) {
+            return res.status(409).json({
+                message: "Cannot modify tank while one or more nozzles are occupied",
+            });
+        }
+
         if (capacity !== undefined && capacity < tank?.currentQuantity) {
             return res.status(400).json({
                 message: "Capacity cannot be less than the current fuel quantity"
@@ -104,10 +112,21 @@ export const deleteTank = async (req, res) => {
             return res.status(400).json({ message: "Invalid tank id" });
         }
 
-        const tank = await Tank.findByIdAndDelete(tankId)
+        const tank = await Tank.findById(tankId)
         if (!tank) {
             return res.status(404).json({ message: "Tank not found" })
         }
+
+        const occupiedNozzle = await Nozzle.findOne({
+            tankId, isOccupied: true,
+        });
+
+        if (occupiedNozzle) {
+            return res.status(409).json({
+                message: "Cannot delete tank while one or more connected nozzles are occupied",
+            });
+        }
+        await Tank.findByIdAndDelete(tankId)
         return res.status(200).json({ message: "Tank deleted successfully" })
 
     } catch (error) {
