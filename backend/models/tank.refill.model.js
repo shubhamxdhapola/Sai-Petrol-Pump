@@ -11,6 +11,10 @@ const tankRefillSchema = new mongoose.Schema({
         required: true,
         min: [1, "Quantity must be greater than 0"],
     },
+    pricePerLitre : {
+        type : Number,
+        required : true
+    },
     refillDate: {
         type: Date,
         default: Date.now,

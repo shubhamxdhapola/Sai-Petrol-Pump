@@ -5,6 +5,10 @@ export const createTankRefillSchema = z.object({
         .number({ error: "Quantity is required and must be a numeric value" })
         .min(1, "Quantity must be greater than 0"),
 
+    pricePerLitre: z.coerce
+        .number({ error: "Price is required and must be a numeric value" })
+        .min(1, "Price must be greater than 1"),
+
     refillDate: z.coerce
         .date()
         .optional(),
@@ -19,6 +23,11 @@ export const updateTankRefillSchema = z.object({
     quantity: z.coerce
         .number({ error: "Quantity must be a numeric value" })
         .min(1, "Quantity must be greater than 0")
+        .optional(),
+
+    pricePerLitre: z.coerce
+        .number({ error: "Price is required and must be a numeric value" })
+        .min(1, "Price must be greater than 1")
         .optional(),
 
     refillDate: z.coerce

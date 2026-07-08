@@ -282,6 +282,7 @@ export const endShift = async (req, res) => {
             shiftNozzle.amount = amount;
             shiftNozzle.pricePerLitre = pricePerLitre;
             shiftNozzle.closingReading = reading.closingReading;
+            shiftNozzle.fuelType = nozzle.tankId.fuelType
 
             // Calculate the total fuel sold and total amount during a shift
             totalFuelSold += fuelSold;

@@ -55,7 +55,7 @@ export const createRefill = async (req, res) => {
 
     try {
         const { tankId } = req.params;
-        const { quantity, refillDate, remarks } = req.body;
+        const { quantity, refillDate, pricePerLitre, remarks } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(tankId)) {
             return res.status(400).json({ message: "Invalid tank id", });
@@ -78,7 +78,7 @@ export const createRefill = async (req, res) => {
         }
 
         const refill = await TankRefill.create(
-            [{ tankId, quantity, refillDate, remarks }],
+            [{ tankId, quantity, pricePerLitre, refillDate, remarks }],
             { session }
         );
 
@@ -119,7 +119,7 @@ export const updateRefill = async (req, res) => {
     try {
         const { tankId } = req.params;
         const refillId = req.params.id
-        const { quantity, refillDate, remarks } = req.body;
+        const { quantity, refillDate, pricePerLitre, remarks } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(tankId) ||
             !mongoose.Types.ObjectId.isValid(refillId)) {
@@ -160,6 +160,10 @@ export const updateRefill = async (req, res) => {
             tank.currentQuantity = newQuantity;
             await tank.save({ session })
             updates.quantity = quantity;
+        }
+
+        if (pricePerLitre !== undefined) {
+            updates.pricePerLitre = pricePerLitre
         }
 
         if (refillDate !== undefined)

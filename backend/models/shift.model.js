@@ -25,6 +25,10 @@ const shiftSchema = new mongoose.Schema({
             type: Number,
             min: 0
         },
+        fuelType : {
+            type : String,
+            enum : ['PETROL', 'DIESEL']
+        },
 
         closingReading: Number,
 

@@ -9,6 +9,7 @@ import tankRoutes from './routes/tank.routes.js'
 import fuelPriceRoutes from './routes/fuel.price.route.js'
 import machineRoutes from './routes/machine.routes.js'
 import shiftRoutes from './routes/shift.routes.js'
+import reportRoutes from './routes/report.routes.js'
 
 const app = express();
 const PORT = process.env.PORT
@@ -26,6 +27,7 @@ app.use('/api/tanks', tankRoutes)
 app.use('/api/fuel-prices', fuelPriceRoutes)
 app.use('/api/machines', machineRoutes)
 app.use('/api/shifts', shiftRoutes)
+app.use('/api/reports', reportRoutes)
 
 app.use((req, res) => {
     return res.status(404).json({ 
