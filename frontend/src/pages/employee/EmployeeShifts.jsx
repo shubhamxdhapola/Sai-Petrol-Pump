@@ -11,6 +11,7 @@ import { dateTime, number } from "../../utils/formatters";
 import { showErrorToast, showSuccessToast } from "../../utils/helper";
 import { CardSkeleton, TableSkeleton } from "../../components/Skeletons";
 import Pagination from "../../components/Pagination";
+import Loader from "../../components/Loader";
 
 export default function EmployeeShifts() {
   const [shifts, setShifts] = useState([]);
@@ -18,6 +19,7 @@ export default function EmployeeShifts() {
   const [machineId, setMachineId] = useState("");
   const [machineNozzles, setMachineNozzles] = useState([]);
   const [selectedNozzles, setSelectedNozzles] = useState([]);
+  const [loadingNozzles, setLoadingNozzles] = useState(false);
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(null);
@@ -54,10 +56,13 @@ export default function EmployeeShifts() {
       setMachineNozzles([]);
       return;
     }
+    setMachineNozzles([]);
+    setLoadingNozzles(true);
     machineApi
       .nozzles(machineId)
       .then((data) => setMachineNozzles(data))
-      .catch((err) => setError(apiErrorMessage(err, "Unable to load nozzles")));
+      .catch((err) => setError(apiErrorMessage(err, "Unable to load nozzles")))
+      .finally(() => setLoadingNozzles(false));
   }, [machineId]);
 
   const active = shifts.find((shift) => shift.status === "ONGOING");
@@ -383,45 +388,57 @@ export default function EmployeeShifts() {
               Select Nozzle(s) <span className="text-red-500">*</span>
             </span>
             <div className="max-h-72 overflow-auto rounded-lg border border-slate-200">
-              {machineNozzles.map((n) => {
-                const disabled =
-                  n.isOccupied || !n.isActive || !n.tankId?.isActive;
-                return (
-                  <label
-                    key={n._id}
-                    className={`flex items-center gap-4 border-b border-slate-200 p-4 last:border-0 ${disabled ? "bg-slate-50 text-muted" : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      disabled={disabled}
-                      checked={selectedNozzles.includes(n._id)}
-                      onChange={(e) =>
-                        setSelectedNozzles((prev) =>
-                          e.target.checked
-                            ? [...prev, n._id]
-                            : prev.filter((id) => id !== n._id),
-                        )
-                      }
-                    />
-                    <strong>{n.nozzleNumber}</strong>
-                    <Badge
-                      tone={n.tankId?.fuelType === "PREMIUM" ? "purple" : n.tankId?.fuelType === "DIESEL" ? "blue" : "green"}
-                    >
-                      {n.tankId?.fuelType || "Fuel"}
-                    </Badge>
-                    {n.isOccupied && (
-                      <Badge tone="orange">Occupied</Badge>
-                    )}
-                    <span className="ml-auto text-sm">
-                      Reading: {number(n.currentReading, 2)} L
-                    </span>
-                  </label>
-                );
-              })}
-              {!machineNozzles.length && (
-                <p className="p-4 text-sm text-muted">
-                  Select a machine to load nozzles.
-                </p>
+              {loadingNozzles ? (
+                <div className="flex items-center justify-center p-8">
+                  <Loader size="md" />
+                </div>
+              ) : (
+                <>
+                  {machineNozzles.map((n) => {
+                    const disabled =
+                      n.isOccupied || !n.isActive || !n.tankId?.isActive;
+                    return (
+                      <label
+                        key={n._id}
+                        className={`flex items-center gap-4 border-b border-slate-200 p-4 last:border-0 ${disabled ? "bg-slate-50 text-muted" : ""}`}
+                      >
+                        <input
+                          type="checkbox"
+                          disabled={disabled}
+                          checked={selectedNozzles.includes(n._id)}
+                          onChange={(e) =>
+                            setSelectedNozzles((prev) =>
+                              e.target.checked
+                                ? [...prev, n._id]
+                                : prev.filter((id) => id !== n._id),
+                            )
+                          }
+                        />
+                        <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                          <div className="flex items-center gap-2">
+                            <strong>{n.nozzleNumber}</strong>
+                            <Badge
+                              tone={n.tankId?.fuelType === "PREMIUM" ? "purple" : n.tankId?.fuelType === "DIESEL" ? "blue" : "green"}
+                            >
+                              {n.tankId?.fuelType || "Fuel"}
+                            </Badge>
+                            {n.isOccupied && (
+                              <Badge tone="orange">Occupied</Badge>
+                            )}
+                          </div>
+                          <span className="text-sm sm:ml-auto">
+                            Reading: {number(n.currentReading, 2)} L
+                          </span>
+                        </div>
+                      </label>
+                    );
+                  })}
+                  {!machineNozzles.length && (
+                    <p className="p-4 text-sm text-muted">
+                      Select a machine to load nozzles.
+                    </p>
+                  )}
+                </>
               )}
             </div>
           </label>
