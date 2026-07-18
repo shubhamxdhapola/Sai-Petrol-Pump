@@ -30,7 +30,8 @@ export const getSalesReport = async (req, res) => {
                     _id: {
                         $dateToString: {
                             format: "%Y-%m-%d",
-                            date: "$endTime"
+                            date: "$endTime",
+                            timezone: "+05:30"
                         }
                     },
 
@@ -48,6 +49,16 @@ export const getSalesReport = async (req, res) => {
                         $sum: {
                             $cond: [
                                 { $eq: ["$nozzles.fuelType", "DIESEL"] },
+                                "$nozzles.fuelSold",
+                                0
+                            ]
+                        }
+                    },
+
+                    premiumSold: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$nozzles.fuelType", "PREMIUM"] },
                                 "$nozzles.fuelSold",
                                 0
                             ]
@@ -72,18 +83,30 @@ export const getSalesReport = async (req, res) => {
                                 0
                             ]
                         }
+                    },
+
+                    premiumRevenue: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$nozzles.fuelType", "PREMIUM"] },
+                                "$nozzles.amount",
+                                0
+                            ]
+                        }
                     }
                 }
             },
 
-            { $sort: { _id: 1 } }
+            { $sort: { _id: -1 } }
         ]);
 
         const totals = {
             petrolSold: 0,
             dieselSold: 0,
+            premiumSold: 0,
             petrolRevenue: 0,
             dieselRevenue: 0,
+            premiumRevenue: 0,
             totalRevenue: 0
         };
 
@@ -92,13 +115,15 @@ export const getSalesReport = async (req, res) => {
             row.date = row._id;
             delete row._id;
 
-            row.totalRevenue = row.petrolRevenue + row.dieselRevenue;
+            row.totalRevenue = row.petrolRevenue + row.dieselRevenue + (row.premiumRevenue || 0);
 
             totals.petrolSold += row.petrolSold;
             totals.dieselSold += row.dieselSold;
+            totals.premiumSold += (row.premiumSold || 0);
 
             totals.petrolRevenue += row.petrolRevenue;
             totals.dieselRevenue += row.dieselRevenue;
+            totals.premiumRevenue += (row.premiumRevenue || 0);
 
             totals.totalRevenue += row.totalRevenue;
         });
@@ -130,7 +155,7 @@ export const getRefillReport = async (req, res) => {
             refillDate: { $gte: start, $lte: end }
         })
             .populate("tankId", "name tankNumber fuelType")
-            .sort({ refillDate: 1 });
+            .sort({ refillDate: -1 });
 
         const report = [];
 
@@ -141,13 +166,14 @@ export const getRefillReport = async (req, res) => {
 
         refills.forEach(refill => {
 
-            const amount = refill.quantity * refill.pricePerLitre;
+            const price = refill.pricePerLitre || 0;
+            const amount = refill.quantity * price;
 
             report.push({
                 date: refill.refillDate,
-                tank: refill.tankId.name,
-                fuelType: refill.tankId.fuelType,
-                pricePerLitre : refill.pricePerLitre,
+                tank: refill.tankId?.name || "Deleted Tank",
+                fuelType: refill.tankId?.fuelType || "N/A",
+                pricePerLitre: price,
                 quantity: refill.quantity,
                 amount
             });

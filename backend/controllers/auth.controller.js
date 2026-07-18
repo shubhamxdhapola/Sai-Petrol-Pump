@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import { generateToken } from "../utils/generateToken.js";
 import { saveCookie } from "../utils/saveCookie.js";
@@ -72,7 +73,7 @@ export const changePassword = async (req, res) => {
         const { currentPassword, newPassword } = req.body;
         const userId = req.user._id
 
-        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ message: "Invalid user id" });
         }
 

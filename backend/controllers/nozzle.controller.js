@@ -16,7 +16,7 @@ export const getNozzles = async (req, res) => {
             return res.status(404).json({ message: "Machine not found" });
         }
 
-        const nozzles = await Nozzle.find({ machineId });
+        const nozzles = await Nozzle.find({ machineId }).populate("tankId", "name tankNumber fuelType isActive");
         return res.status(200).json(nozzles);
     } catch (error) {
         console.log("Error in getNozzles controller :", error);

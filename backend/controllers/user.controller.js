@@ -53,7 +53,7 @@ export const getUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
     try {
-        const users = await User.find({ role: 'employee' })
+        const users = await User.find({ role: 'employee' }).sort({ createdAt: -1 })
         return res.status(200).json(users)
     } catch (error) {
         console.log("Error in getUsers controller : ", error)

@@ -228,11 +228,12 @@ export const endShift = async (req, res) => {
             }
         }).populate("tankId").session(session);
 
-        const { PETROL, DIESEL } = await getCurrentFuelPrices(session); // Get the lastest fuel prices
+        const { PETROL, DIESEL, PREMIUM } = await getCurrentFuelPrices(session); // Get the lastest fuel prices
 
         const priceMap = new Map([ // Create a mapping of latest fuel prices e.g - FuelType : Price
-            ["PETROL", PETROL.price],
-            ["DIESEL", DIESEL.price],
+            ["PETROL", PETROL ? PETROL.price : 0],
+            ["DIESEL", DIESEL ? DIESEL.price : 0],
+            ["PREMIUM", PREMIUM ? PREMIUM.price : 0],
         ]);
 
         const tankDeductions = new Map(); // This will be used to deduct the total sold fuel during the shift from each nozzle
@@ -349,13 +350,15 @@ export const endShift = async (req, res) => {
             },
             {
                 path: "nozzles.nozzleId",
-                select: "nozzleNumber"
+                select: "nozzleNumber tankId",
+                populate: {
+                    path: "tankId",
+                    select: "fuelType"
+                }
             }
         ]);
 
         const shiftResponse = shift.toObject();
-
-        delete shiftResponse.totalAmount;
 
         shiftResponse.nozzles = shiftResponse.nozzles.map(nozzle => {
             delete nozzle.amount;
@@ -431,6 +434,14 @@ export const getShifts = async (req, res) => {
             .select(fields)
             .populate("employeeId", "name phone")
             .populate("machineId", "name machineNumber")
+            .populate({
+                path: "nozzles.nozzleId",
+                select: "nozzleNumber tankId",
+                populate: {
+                    path: "tankId",
+                    select: "fuelType"
+                }
+            })
             .sort({ startTime: -1 })
             .lean();
 

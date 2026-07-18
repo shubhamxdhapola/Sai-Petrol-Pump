@@ -17,7 +17,7 @@ const tankSchema = new mongoose.Schema({
     },
     fuelType: {
         type: String,
-        enum: ['PETROL', 'DIESEL'],
+        enum: ['PETROL', 'DIESEL', 'PREMIUM'],
         required: true,
         uppercase: true,
         trim: true

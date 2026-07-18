@@ -7,8 +7,8 @@ import { createMachine, deleteMachine, getMachine, getMachines, updateMachine } 
 
 const router = express.Router();
 
-router.get('/', authenticate, isAdmin, getMachines)
-router.get('/:id', authenticate, isAdmin, getMachine)
+router.get('/', authenticate, getMachines)
+router.get('/:id', authenticate, getMachine)
 router.delete('/:id', authenticate, isAdmin, deleteMachine)
 
 router.post('/',

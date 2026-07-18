@@ -6,8 +6,8 @@ export const createPriceSchema = z.object({
         .trim()
         .transform((value) => value.toUpperCase())
         .pipe(
-            z.enum(["PETROL", "DIESEL"], {
-                error: "Fuel type must be either PETROL or DIESEL",
+            z.enum(["PETROL", "DIESEL", "PREMIUM"], {
+                error: "Fuel type must be either PETROL, DIESEL or PREMIUM",
             })
         ),
 
@@ -16,4 +16,8 @@ export const createPriceSchema = z.object({
             error: "Price is required and must be a numeric value",
         })
         .positive("Price must be greater than 0"),
+
+    effectiveFrom: z.coerce
+        .date()
+        .optional(),
 });

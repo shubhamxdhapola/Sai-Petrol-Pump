@@ -1,41 +1,45 @@
 
 const getDateRange = (period, startDate, endDate) => {
+    const OFFSET_MS = 5.5 * 60 * 60 * 1000; // India Offset (+05:30)
 
-    // Custom Date Range
     if (startDate && endDate) {
+        // Parse date strings in local time and convert to UTC
+        const startLocalMidnight = new Date(startDate).getTime() - OFFSET_MS;
+        const endLocalMidnight = new Date(endDate).getTime() - OFFSET_MS + (24 * 60 * 60 * 1000) - 1;
+
         return {
-            startDate: new Date(startDate),
-            endDate: new Date(
-                new Date(endDate).setHours(23, 59, 59, 999)
-            )
+            startDate: new Date(startLocalMidnight),
+            endDate: new Date(endLocalMidnight)
         };
     }
 
-    const now = new Date();
+    // Relative Period calculations using local date boundaries:
+    const nowUTC = new Date();
+    const nowLocal = new Date(nowUTC.getTime() + OFFSET_MS);
 
-    // End of today
-    const end = new Date(now);
-    end.setHours(23, 59, 59, 999);
+    const endLocal = new Date(nowLocal);
+    endLocal.setHours(23, 59, 59, 999);
 
-    let start = new Date(end);
+    const end = new Date(endLocal.getTime() - OFFSET_MS);
 
+    let startLocal = new Date(endLocal);
     switch (period) {
-
+        case "today":
+            break;
         case "15":
-            start.setDate(end.getDate() - 14);
+            startLocal.setDate(endLocal.getDate() - 14);
             break;
-
         case "30":
-            start.setDate(end.getDate() - 29);
+            startLocal.setDate(endLocal.getDate() - 29);
             break;
-
         case "7":
         default:
-            start.setDate(end.getDate() - 6);
+            startLocal.setDate(endLocal.getDate() - 6);
             break;
     }
+    startLocal.setHours(0, 0, 0, 0);
 
-    start.setHours(0, 0, 0, 0);
+    const start = new Date(startLocal.getTime() - OFFSET_MS);
 
     return {
         startDate: start,

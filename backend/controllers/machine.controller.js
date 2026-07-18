@@ -4,7 +4,7 @@ import Nozzle from "../models/nozzle.model.js";
 
 export const getMachines = async (req, res) => {
     try {
-        const machines = await Machine.find();
+        const machines = await Machine.find().sort({ createdAt: -1 });
         return res.status(200).json(machines);
     } catch (error) {
         console.log("Error in getMachines controller : ", error)

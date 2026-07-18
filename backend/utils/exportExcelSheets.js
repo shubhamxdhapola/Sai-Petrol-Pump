@@ -18,7 +18,7 @@ export const exportSalesExcel = async (
 
     // ===== Title =====
 
-    worksheet.mergeCells("A1:F1");
+    worksheet.mergeCells("A1:H1");
 
     worksheet.getCell("A1").value = "Sales Report";
 
@@ -33,7 +33,7 @@ export const exportSalesExcel = async (
 
     // ===== Date Range =====
 
-    worksheet.mergeCells("A2:F2");
+    worksheet.mergeCells("A2:H2");
 
     worksheet.getCell("A2").value =
         `From ${startDate.toLocaleDateString()} To ${endDate.toLocaleDateString()}`;
@@ -42,66 +42,66 @@ export const exportSalesExcel = async (
         horizontal: "center"
     };
 
-    // ===== Header =====
-
     worksheet.columns = [
-
         {
-            header: "Date",
             key: "date",
             width: 18
         },
-
         {
-            header: "Petrol Sold (L)",
             key: "petrolSold",
             width: 18
         },
-
         {
-            header: "Diesel Sold (L)",
             key: "dieselSold",
             width: 18
         },
-
         {
-            header: "Petrol Revenue",
+            key: "premiumSold",
+            width: 18
+        },
+        {
             key: "petrolRevenue",
             width: 20
         },
-
         {
-            header: "Diesel Revenue",
             key: "dieselRevenue",
             width: 20
         },
-
         {
-            header: "Total Revenue",
+            key: "premiumRevenue",
+            width: 20
+        },
+        {
             key: "totalRevenue",
             width: 20
         }
-
     ];
 
     // ===== Header Style =====
 
     const headerRow = worksheet.getRow(3);
 
+    headerRow.values = [
+        "Date",
+        "Petrol Sold (L)",
+        "Diesel Sold (L)",
+        "Premium Sold (L)",
+        "Petrol Revenue",
+        "Diesel Revenue",
+        "Premium Revenue",
+        "Total Revenue"
+    ];
+
     headerRow.font = {
         bold: true
     };
 
     headerRow.fill = {
-
         type: "pattern",
-
         pattern: "solid",
-
         fgColor: {
             argb: "D9EAFD"
         }
-
     };
 
     // ===== Data =====
@@ -116,9 +116,13 @@ export const exportSalesExcel = async (
 
             dieselSold: row.dieselSold,
 
+            premiumSold: row.premiumSold || 0,
+
             petrolRevenue: row.petrolRevenue,
 
             dieselRevenue: row.dieselRevenue,
+
+            premiumRevenue: row.premiumRevenue || 0,
 
             totalRevenue: row.totalRevenue
 
@@ -140,9 +144,13 @@ export const exportSalesExcel = async (
 
         dieselSold: totals.dieselSold,
 
+        premiumSold: totals.premiumSold,
+
         petrolRevenue: totals.petrolRevenue,
 
         dieselRevenue: totals.dieselRevenue,
+
+        premiumRevenue: totals.premiumRevenue,
 
         totalRevenue: totals.totalRevenue
 
@@ -231,7 +239,7 @@ export const exportRefillExcel = async (
 
     // ===== Title =====
 
-    worksheet.mergeCells("A1:E1");
+    worksheet.mergeCells("A1:F1");
 
     worksheet.getCell("A1").value = "Tank Refill Report";
 
@@ -246,7 +254,7 @@ export const exportRefillExcel = async (
 
     // ===== Date Range =====
 
-    worksheet.mergeCells("A2:E2");
+    worksheet.mergeCells("A2:F2");
 
     worksheet.getCell("A2").value =
         `From ${startDate.toLocaleDateString()} To ${endDate.toLocaleDateString()}`;
@@ -259,27 +267,26 @@ export const exportRefillExcel = async (
 
     worksheet.columns = [
         {
-            header: "Date",
             key: "date",
             width: 18
         },
         {
-            header: "Tank",
             key: "tank",
             width: 22
         },
         {
-            header: "Fuel Type",
             key: "fuelType",
             width: 18
         },
         {
-            header: "Quantity (L)",
             key: "quantity",
             width: 18
         },
         {
-            header: "Amount (₹)",
+            key: "pricePerLitre",
+            width: 18
+        },
+        {
             key: "amount",
             width: 20
         }
@@ -288,6 +295,15 @@ export const exportRefillExcel = async (
     // ===== Header Style =====
 
     const headerRow = worksheet.getRow(3);
+
+    headerRow.values = [
+        "Date",
+        "Tank",
+        "Fuel Type",
+        "Quantity (L)",
+        "Price/L (₹)",
+        "Amount (₹)"
+    ];
 
     headerRow.font = {
         bold: true
@@ -310,6 +326,7 @@ export const exportRefillExcel = async (
             tank: refill.tank,
             fuelType: refill.fuelType,
             quantity: refill.quantity,
+            pricePerLitre: refill.pricePerLitre,
             amount: refill.amount
         });
 
@@ -330,6 +347,8 @@ export const exportRefillExcel = async (
         fuelType: "",
 
         quantity: totals.quantity,
+
+        pricePerLitre: "",
 
         amount: totals.amount
 

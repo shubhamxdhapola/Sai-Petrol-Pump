@@ -6,8 +6,8 @@ import { getNozzles, getNozzle, createNozzle, updateNozzle, deleteNozzle } from 
 
 const router = express.Router({ mergeParams: true });
 
-router.get("/", authenticate, isAdmin, getNozzles);
-router.get("/:id", authenticate, isAdmin, getNozzle);
+router.get("/", authenticate, getNozzles);
+router.get("/:id", authenticate, getNozzle);
 router.delete("/:id", authenticate, isAdmin, deleteNozzle);
 
 router.post("/",

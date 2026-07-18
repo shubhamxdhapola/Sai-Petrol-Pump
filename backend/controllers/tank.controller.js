@@ -4,7 +4,7 @@ import Nozzle from "../models/nozzle.model.js"
 
 export const getTanks = async (req, res) => {
     try {
-        const tanks = await Tank.find()
+        const tanks = await Tank.find().sort({ createdAt: -1 })
         return res.status(200).json(tanks)
     } catch (error) {
         console.log("Error in getTanks controller : ", error)

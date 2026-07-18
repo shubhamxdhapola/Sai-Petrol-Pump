@@ -15,7 +15,7 @@ export const getRefills = async (req, res) => {
             return res.status(404).json({ message: "Tank not found", });
         }
 
-        const refills = await TankRefill.find({ tankId });
+        const refills = await TankRefill.find({ tankId }).sort({ refillDate: -1 });
         return res.status(200).json(refills);
 
     } catch (error) {
