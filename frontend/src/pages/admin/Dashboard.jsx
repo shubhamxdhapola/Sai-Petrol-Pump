@@ -249,9 +249,10 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="h-[290px] min-w-0"
+              className="overflow-x-auto pb-4"
             >
-              <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[290px] min-w-[1000px]">
+                <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={data?.revenueChart || []}
                   margin={{ left: 8, right: 16, top: 10, bottom: 0 }}
@@ -298,7 +299,8 @@ export default function Dashboard() {
                   />
                 </AreaChart>
               </ResponsiveContainer>
-            </motion.div>
+            </div>
+          </motion.div>
           )}
         </section>
       </div>
@@ -311,71 +313,73 @@ export default function Dashboard() {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="h-[280px] min-w-0"
+            className="overflow-x-auto pb-4"
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data?.fuelSoldChart || []}
-                margin={{ left: 8, right: 16, top: 10, bottom: 0 }}
-                barSize={22}
-                barGap={4}
-              >
-                <defs>
-                  <linearGradient id="barPetrol" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#059669" />
-                  </linearGradient>
-                  <linearGradient id="barDiesel" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#60a5fa" />
-                    <stop offset="100%" stopColor="#2563eb" />
-                  </linearGradient>
-                  <linearGradient id="barPremium" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#c084fc" />
-                    <stop offset="100%" stopColor="#7e22ce" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="4 4"
-                  vertical={false}
-                  stroke="#f1f5f9"
-                />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 11, fill: "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  width={58}
-                  tick={{ fontSize: 11, fill: "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: "#f8fafc", opacity: 0.6 }}
-                />
-                <Legend wrapperStyle={{ paddingTop: "20px" }} />
-                <Bar
-                  dataKey="petrol"
-                  name="Petrol"
-                  fill="url(#barPetrol)"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="diesel"
-                  name="Diesel"
-                  fill="url(#barDiesel)"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="premium"
-                  name="Premium Petrol"
-                  fill="url(#barPremium)"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="h-[280px] min-w-[1000px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data?.fuelSoldChart || []}
+                  margin={{ left: 8, right: 16, top: 10, bottom: 0 }}
+                  barSize={22}
+                  barGap={4}
+                >
+                  <defs>
+                    <linearGradient id="barPetrol" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#059669" />
+                    </linearGradient>
+                    <linearGradient id="barDiesel" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#60a5fa" />
+                      <stop offset="100%" stopColor="#2563eb" />
+                    </linearGradient>
+                    <linearGradient id="barPremium" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#c084fc" />
+                      <stop offset="100%" stopColor="#7e22ce" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="4 4"
+                    vertical={false}
+                    stroke="#f1f5f9"
+                  />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: "#64748b" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    width={58}
+                    tick={{ fontSize: 11, fill: "#64748b" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    content={<CustomTooltip />}
+                    cursor={{ fill: "#f8fafc", opacity: 0.6 }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: "20px" }} />
+                  <Bar
+                    dataKey="petrol"
+                    name="Petrol"
+                    fill="url(#barPetrol)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="diesel"
+                    name="Diesel"
+                    fill="url(#barDiesel)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="premium"
+                    name="Premium Petrol"
+                    fill="url(#barPremium)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </motion.div>
         )}
       </section>

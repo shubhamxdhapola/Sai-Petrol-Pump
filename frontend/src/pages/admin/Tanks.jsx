@@ -334,10 +334,15 @@ export default function Tanks() {
                           </div>
                         </td>
                         <td>
-                          <Toggle
-                            checked={!!tank.isActive}
-                            onChange={(checked) => toggleActive(tank, checked)}
-                          />
+                          <div className="flex items-center gap-3">
+                            <Badge tone={tank.isActive ? "green" : "red"}>
+                              {tank.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                            <Toggle
+                              checked={!!tank.isActive}
+                              onChange={(checked) => toggleActive(tank, checked)}
+                            />
+                          </div>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-2">

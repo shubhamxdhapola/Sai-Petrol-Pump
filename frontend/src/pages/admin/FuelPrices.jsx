@@ -139,7 +139,7 @@ export default function FuelPrices() {
         addFuelPrice({
           fuelType: fuel,
           price: prVal,
-          ...(form.effectiveFrom ? { effectiveFrom: form.effectiveFrom } : {}),
+          ...(form.effectiveFrom ? { effectiveFrom: new Date(form.effectiveFrom).toISOString() } : {}),
         }),
       ).unwrap();
       dispatch(getCurrentFuelPrices());
@@ -255,8 +255,9 @@ export default function FuelPrices() {
         {fetchingHistory ? (
           <ChartSkeleton />
         ) : (
-          <div className="h-72 min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="overflow-x-auto pb-4">
+            <div className="h-72 min-w-[700px]">
+              <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
                 margin={{ left: 8, right: 16, top: 10, bottom: 0 }}
@@ -336,6 +337,7 @@ export default function FuelPrices() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
+        </div>
         )}
       </section>
       <section className="table-wrap mt-5">

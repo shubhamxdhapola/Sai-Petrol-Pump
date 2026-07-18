@@ -14,32 +14,40 @@ const getDateRange = (period, startDate, endDate) => {
     }
 
     // Relative Period calculations using local date boundaries:
-    const nowUTC = new Date();
-    const nowLocal = new Date(nowUTC.getTime() + OFFSET_MS);
+    const now = new Date();
+    // Shift current time by +5.5 hours to get the current date in IST
+    const nowIST = new Date(now.getTime() + OFFSET_MS);
+    
+    // Extract year, month, date in IST
+    const year = nowIST.getUTCFullYear();
+    const month = nowIST.getUTCMonth();
+    const date = nowIST.getUTCDate();
 
-    const endLocal = new Date(nowLocal);
-    endLocal.setHours(23, 59, 59, 999);
+    // Construct the end of today in IST
+    const endIST = Date.UTC(year, month, date, 23, 59, 59, 999);
+    const end = new Date(endIST - OFFSET_MS);
 
-    const end = new Date(endLocal.getTime() - OFFSET_MS);
-
-    let startLocal = new Date(endLocal);
+    // Calculate days offset
+    let daysOffset = 0;
     switch (period) {
         case "today":
+            daysOffset = 0;
             break;
         case "15":
-            startLocal.setDate(endLocal.getDate() - 14);
+            daysOffset = 14;
             break;
         case "30":
-            startLocal.setDate(endLocal.getDate() - 29);
+            daysOffset = 29;
             break;
         case "7":
         default:
-            startLocal.setDate(endLocal.getDate() - 6);
+            daysOffset = 6;
             break;
     }
-    startLocal.setHours(0, 0, 0, 0);
 
-    const start = new Date(startLocal.getTime() - OFFSET_MS);
+    // Construct the start of the period in IST
+    const startIST = Date.UTC(year, month, date - daysOffset, 0, 0, 0, 0);
+    const start = new Date(startIST - OFFSET_MS);
 
     return {
         startDate: start,

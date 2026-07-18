@@ -18,6 +18,13 @@ import Pagination from "../../components/Pagination";
 
 const blank = { quantity: "", pricePerLitre: "", refillDate: "", remarks: "" };
 
+const toLocalISOString = (dateOrStr) => {
+  if (!dateOrStr) return "";
+  const date = new Date(dateOrStr);
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+};
+
 export default function Refills() {
   const dispatch = useDispatch();
   const { allTanks, error: tankError, fetchingTanks } = useSelector((state) => state.tank);
@@ -92,7 +99,7 @@ export default function Refills() {
     setForm({
       quantity: refill.quantity || "",
       pricePerLitre: refill.pricePerLitre || "",
-      refillDate: refill.refillDate ? new Date(refill.refillDate).toISOString().slice(0, 16) : "",
+      refillDate: toLocalISOString(refill.refillDate),
       remarks: refill.remarks || "",
     });
     setOpen(true);
@@ -132,7 +139,7 @@ export default function Refills() {
           data: {
             quantity: qtyVal,
             pricePerLitre: priceVal,
-            refillDate: form.refillDate || new Date().toISOString(),
+            refillDate: form.refillDate ? new Date(form.refillDate).toISOString() : new Date().toISOString(),
             remarks: remarksTrim,
           }
         })).unwrap();
@@ -142,7 +149,7 @@ export default function Refills() {
           data: {
             quantity: qtyVal,
             pricePerLitre: priceVal,
-            refillDate: form.refillDate || new Date().toISOString(),
+            refillDate: form.refillDate ? new Date(form.refillDate).toISOString() : new Date().toISOString(),
             remarks: remarksTrim,
           }
         })).unwrap();

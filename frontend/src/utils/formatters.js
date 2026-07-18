@@ -19,7 +19,10 @@ export const dateTime = (value) =>
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-      }).format(new Date(value))
+      })
+        .format(new Date(value))
+        .replace(/am/gi, 'AM')
+        .replace(/pm/gi, 'PM')
     : '-';
 
 export const initials = (name = 'User') =>
