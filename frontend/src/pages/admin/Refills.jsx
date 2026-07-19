@@ -39,6 +39,7 @@ export default function Refills() {
   const [form, setForm] = useState(blank);
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [localError, setLocalError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -169,6 +170,7 @@ export default function Refills() {
 
   const remove = async () => {
     if (!deleteConfirm) return;
+    setDeleting(true);
     try {
       await dispatch(deleteRefill({ tankId: selectedTankId, refillId: deleteConfirm._id })).unwrap();
       showSuccessToast("Refill deleted successfully");
@@ -177,6 +179,8 @@ export default function Refills() {
       dispatch(getAllTanks());
     } catch (err) {
       showErrorToast(err || "Unable to delete refill");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -410,8 +414,9 @@ export default function Refills() {
         onClose={() => setDeleteConfirm(null)}
         onCancel={() => setDeleteConfirm(null)}
         onConfirm={remove}
-        title="Delete Refill"
-        message={`Are you sure you want to delete this refill record of ${number(deleteConfirm?.quantity, 2)} L? This action cannot be undone.`}
+        loading={deleting}
+        title="Delete Refill Record"
+        message={`Are you sure you want to delete this refill of ${number(deleteConfirm?.quantity, 2)} L? This action cannot be undone.`}
         confirmText="Delete Refill"
       />
     </>

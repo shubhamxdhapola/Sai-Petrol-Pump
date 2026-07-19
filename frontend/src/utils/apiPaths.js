@@ -29,6 +29,7 @@ export const API_PATHS = {
     DELETE: (id) => `/api/machines/${id}`,
     NOZZLES: (machineId) => `/api/machines/${machineId}/nozzles`,
     NOZZLE_ONE: (machineId, nozzleId) => `/api/machines/${machineId}/nozzles/${nozzleId}`,
+    SALES_SUMMARY: '/api/machines/sales-summary',
   },
   FUEL_PRICE: {
     CURRENT: '/api/fuel-prices',

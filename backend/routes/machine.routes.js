@@ -3,11 +3,12 @@ import nozzleRoutes from './nozzle.routes.js'
 import validate from '../middlewares/validate.middleware.js';
 import { authenticate, isAdmin } from '../middlewares/authenticate.middleware.js';
 import { createMachineSchema, updateMachineSchema } from '../validations/machine.validation.js';
-import { createMachine, deleteMachine, getMachine, getMachines, updateMachine } from '../controllers/machine.controller.js';
+import { createMachine, deleteMachine, getMachine, getMachines, updateMachine, getMachineSalesSummary } from '../controllers/machine.controller.js';
 
 const router = express.Router();
 
 router.get('/', authenticate, getMachines)
+router.get('/sales-summary', authenticate, isAdmin, getMachineSalesSummary)
 router.get('/:id', authenticate, getMachine)
 router.delete('/:id', authenticate, isAdmin, deleteMachine)
 

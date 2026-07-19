@@ -32,25 +32,29 @@ export default function ChangePassword() {
         title="Change Password"
         subtitle="Update your password to keep your account secure."
       />
-      <section className="soft-card mx-auto max-w-4xl p-8 md:p-16">
-        <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-blue-100 text-4xl text-brand">
-          <FiLock />
+      <section className="soft-card !rounded-2xl border border-slate-200 bg-white shadow-sm max-w-xl p-6 sm:p-8">
+        <div className="flex items-center gap-4 border-b border-slate-100 pb-6">
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-xl text-brand border border-blue-100/50 shadow-xs">
+            <FiLock />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">Security Settings</h2>
+            <p className="text-sm text-muted">Update your login password</p>
+          </div>
         </div>
-        <h2 className="mt-8 text-center text-3xl font-bold">Change Password</h2>
-        <p className="mt-3 text-center text-muted">
-          Enter your current password and new password
-        </p>
+
         {error && (
-          <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-600">
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-600">
             {error}
           </div>
         )}
         {message && (
-          <div className="mt-6 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">
+          <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">
             {message}
           </div>
         )}
-        <form onSubmit={submit} className="mt-10 space-y-6">
+
+        <form onSubmit={submit} className="mt-7 space-y-6">
           <Field
             label="Old Password"
             type="password"
@@ -71,16 +75,27 @@ export default function ChangePassword() {
             onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
             required
           />
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-5 text-sm">
-            <strong>Password must contain:</strong>
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>At least 4 characters</li>
-              <li>Maximum 20 characters</li>
+          
+          <div className="rounded-xl border border-blue-100 bg-blue-50/20 p-5 text-sm">
+            <strong className="text-slate-800 font-semibold flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-600"></span>
+              Password requirements:
+            </strong>
+            <ul className="mt-3 space-y-2 text-muted list-inside pl-3">
+              <li className="flex items-center gap-2">
+                <span className="text-blue-500">•</span> At least 4 characters
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-blue-500">•</span> Maximum 20 characters
+              </li>
             </ul>
           </div>
-          <button className="btn-primary w-full" disabled={saving}>
-            {saving ? "Updating..." : "Update Password"}
-          </button>
+
+          <div className="flex justify-start pt-2">
+            <button className="btn-primary px-8 shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto" disabled={saving}>
+              {saving ? "Updating Password..." : "Update Password"}
+            </button>
+          </div>
         </form>
       </section>
     </>

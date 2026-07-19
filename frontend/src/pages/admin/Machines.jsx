@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiPlus, FiTrash2, FiInfo } from "react-icons/fi";
 import { MdOutlineLocalGasStation } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import Badge from "../../components/Badge";
@@ -10,11 +10,11 @@ import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import Toggle from "../../components/Toggle";
 import { getAllMachines, addMachine, updateMachine, deleteMachine } from "../../redux/slices/machine.slice";
-import { machineApi } from "../../utils/api";
+import { machineApi, apiErrorMessage } from "../../utils/api";
 import { number } from "../../utils/formatters";
 import ConfirmModal from "../../components/ConfirmModal";
 import { showErrorToast, showSuccessToast } from "../../utils/helper";
-import { CardSkeleton } from "../../components/Skeletons";
+import { CardSkeleton, TableSkeleton } from "../../components/Skeletons";
 import Pagination from "../../components/Pagination";
 
 const blank = { name: "", machineNumber: "" };
@@ -30,11 +30,15 @@ export default function Machines() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState(blank);
   const [localError, setLocalError] = useState("");
   const [saving, setSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [salesSummary, setSalesSummary] = useState([]);
+  const [periodFilter, setPeriodFilter] = useState("today"); // "today", "seven", "fifteen", "thirty"
 
   useEffect(() => {
     setCurrentPage(1);
@@ -44,6 +48,9 @@ export default function Machines() {
 
   useEffect(() => {
     dispatch(getAllMachines());
+    machineApi.salesSummary()
+      .then(data => setSalesSummary(data))
+      .catch(err => console.error("Error fetching sales summary:", err));
   }, [dispatch]);
 
   useEffect(() => {
@@ -139,12 +146,15 @@ export default function Machines() {
 
   const remove = async () => {
     if (!deleteConfirm) return;
+    setDeleting(true);
     try {
       await dispatch(deleteMachine(deleteConfirm._id)).unwrap();
       showSuccessToast("Machine deleted successfully");
       setDeleteConfirm(null);
     } catch (err) {
       showErrorToast(err || "Unable to delete machine");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -165,7 +175,8 @@ export default function Machines() {
           {error}
         </div>
       )}
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4 mt-6">
         {loading ? (
           <CardSkeleton count={4} />
         ) : (
@@ -196,41 +207,69 @@ export default function Machines() {
           </>
         )}
       </div>
-      <div className="mt-7 max-w-xs border-b border-slate-200 pb-4">
-        <SelectField
-          label="Status"
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
-        >
-          <option value="all">All Machines</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </SelectField>
+
+      {/* Filter Controls Row */}
+      <div className="mt-7 flex flex-wrap gap-4 border-b border-slate-200 pb-4">
+        <div className="w-full sm:w-48">
+          <SelectField
+            label="Status"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="all">All Machines</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </SelectField>
+        </div>
+        <div className="w-full sm:w-48">
+          <SelectField
+            label="Fuel Sold Period"
+            value={periodFilter}
+            onChange={(event) => setPeriodFilter(event.target.value)}
+          >
+            <option value="today">Today</option>
+            <option value="seven">Last 7 Days</option>
+            <option value="fifteen">Last 15 Days</option>
+            <option value="thirty">Last 30 Days</option>
+          </SelectField>
+        </div>
       </div>
-      <div className="mt-5 space-y-4">
+
+      <div className="mt-5 space-y-6">
         {loading ? (
           <CardSkeleton count={2} />
         ) : (
           <>
             {filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((machine) => {
               const machineNozzles = nozzlesByMachine[machine._id] || [];
+              const salesRecord = salesSummary.find(s => s.machineId === machine._id);
+              const fuelSoldVal = salesRecord ? salesRecord[periodFilter] : 0;
+              const periodLabel = {
+                today: "Today",
+                seven: "7 Days",
+                fifteen: "15 Days",
+                thirty: "30 Days"
+              }[periodFilter];
+
               return (
-                <section key={machine._id} className="soft-card overflow-hidden">
-                  <div className="grid gap-5 border-b border-slate-200 p-5 lg:grid-cols-[1.3fr_1fr_auto] lg:items-center">
-                    <div className="flex items-center gap-5">
+                <section key={machine._id} className="soft-card !rounded-2xl overflow-hidden border border-slate-200/80 bg-white shadow-xs">
+                  {/* Card Header Section */}
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 gap-6 border-b border-slate-100 bg-slate-50/30">
+                    {/* 1. Machine Info */}
+                    <div className="flex items-center gap-4 min-w-0">
                       <div
-                        className={`grid h-14 w-14 shrink-0 place-items-center rounded-md ${machine.isActive ? "bg-blue-100 text-brand" : "bg-red-100 text-red-500"}`}
+                        className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl border ${machine.isActive ? "bg-blue-50 border-blue-100 text-brand" : "bg-red-50 border-red-100 text-red-500"}`}
                       >
-                        <MdOutlineLocalGasStation className="text-2xl" />
+                        <MdOutlineLocalGasStation className="text-xl" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="truncate text-lg font-bold">
+                        <h3 className="truncate text-base font-bold text-slate-800">
                           {machine.name}
                         </h3>
-                        <p className="text-sm text-muted">
+                        <p className="text-xs text-muted font-medium mt-0.5">
                           Machine No. {machine.machineNumber}
                         </p>
-                        <div className="mt-2 flex items-center gap-3">
+                        <div className="mt-2.5 flex items-center gap-2">
                           <Badge tone={machine.isActive ? "green" : "red"}>
                             {machine.isActive ? "Active" : "Inactive"}
                           </Badge>
@@ -241,48 +280,73 @@ export default function Machines() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-1 text-sm">
-                      <div className="text-muted">Connected Nozzles</div>
-                      <strong>{machineNozzles.length} Nozzles</strong>
+
+                    {/* 2. Connected Nozzles */}
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
+                      <div className="flex flex-col text-sm">
+                        <span className="text-xs text-muted font-semibold uppercase tracking-wider select-none">Connected Nozzles</span>
+                        <strong className="text-slate-800 text-base font-bold mt-0.5">{machineNozzles.length} Nozzles</strong>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
+
+                    {/* 3. Fuel Sold */}
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
+                      <div className="flex flex-col text-sm">
+                        <span className="text-xs text-muted font-semibold uppercase tracking-wider select-none">Fuel Sold ({periodLabel})</span>
+                        <strong className="text-slate-800 text-base font-bold mt-0.5">{number(fuelSoldVal, 2)} L</strong>
+                      </div>
+                    </div>
+                    
+                    {/* 4. Action Buttons */}
+                    <div className="flex gap-2 mt-1 md:mt-0">
                       <Link
                         to={`/admin/machines/${machine._id}`}
-                        className="btn-secondary py-2 text-brand"
+                        className="btn-secondary px-3 text-brand"
+                        title="View Details"
                       >
-                        Details
+                        <FiInfo />
                       </Link>
                       <button
                         onClick={() => openEdit(machine)}
                         className="btn-secondary px-3 text-brand"
+                        title="Edit Machine"
                       >
                         <FiEdit2 />
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(machine)}
                         className="btn-secondary px-3 text-red-500 hover:bg-red-50"
+                        title="Delete Machine"
                       >
                         <FiTrash2 />
                       </button>
                     </div>
                   </div>
-                  <div className="grid gap-4 p-5 lg:grid-cols-[120px_1fr] lg:items-start">
-                    <p className="font-semibold">
-                      Nozzles ({machineNozzles.length})
-                    </p>
-                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+
+                  {/* Nozzles Grid Area */}
+                  <div className="p-6 bg-white">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-sm font-semibold text-slate-700 select-none">Dispenser Nozzles</span>
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600 select-none">
+                        {machineNozzles.length}
+                      </span>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                       {machineNozzles.map((nozzle) => (
                         <div
                           key={nozzle._id}
-                          className="rounded-lg border border-slate-200 p-4 bg-white"
+                          className="rounded-xl border border-slate-200/80 p-4 bg-white hover:shadow-xs transition"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <strong className="text-slate-800">Nozzle {nozzle.nozzleNumber}</strong>
-                            <span className="text-sm font-semibold text-muted">
+                            <strong className="text-slate-800 font-bold text-sm">Nozzle {nozzle.nozzleNumber}</strong>
+                            <span className="text-xs font-bold text-slate-600">
                               {number(nozzle.currentReading, 2)} L
                             </span>
                           </div>
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          <div className="mt-3.5 flex flex-wrap gap-1.5">
                             <Badge
                               tone={
                                 nozzle.tankId?.fuelType === "PREMIUM"
@@ -313,7 +377,7 @@ export default function Machines() {
                         </div>
                       ))}
                       {!machineNozzles.length && (
-                        <p className="text-sm text-muted">No nozzles added yet.</p>
+                        <p className="text-sm text-muted py-2 select-none col-span-full">No nozzles added yet.</p>
                       )}
                     </div>
                   </div>
@@ -377,8 +441,9 @@ export default function Machines() {
         onClose={() => setDeleteConfirm(null)}
         onCancel={() => setDeleteConfirm(null)}
         onConfirm={remove}
+        loading={deleting}
         title="Delete Machine"
-        message={`Are you sure you want to delete machine "${deleteConfirm?.name}"? This action cannot be undone and will affect any linked nozzles.`}
+        message={`Are you sure you want to delete "${deleteConfirm?.name}"? This action cannot be undone.`}
         confirmText="Delete Machine"
       />
     </>

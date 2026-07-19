@@ -43,6 +43,7 @@ export const machineApi = {
   createNozzle: (machineId, payload) => axiosInstance.post(API_PATHS.MACHINE.NOZZLES(machineId), payload).then(extractData),
   updateNozzle: (machineId, nozzleId, payload) => axiosInstance.patch(API_PATHS.MACHINE.NOZZLE_ONE(machineId, nozzleId), payload).then(extractData),
   removeNozzle: (machineId, nozzleId) => axiosInstance.delete(API_PATHS.MACHINE.NOZZLE_ONE(machineId, nozzleId)).then(extractData),
+  salesSummary: () => axiosInstance.get(API_PATHS.MACHINE.SALES_SUMMARY).then(extractData),
 };
 
 export const fuelPriceApi = {

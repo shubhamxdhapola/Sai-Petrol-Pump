@@ -22,7 +22,7 @@ export const authenticate = async (req, res, next) => {
             next()
         })
     } catch (error) {
-        console.log("Error in authenticate middleware : ", err)
+        console.log("Error in authenticate middleware : ", error)
         res.status(500).json({ message: "Internal server error!" })
     }
 }

@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Machine from "../models/machine.model.js";
 import Nozzle from "../models/nozzle.model.js";
+import Shift from "../models/shift.model.js";
+import getDateRange from "../utils/getDateRange.js";
 
 export const getMachines = async (req, res) => {
     try {
@@ -154,3 +156,72 @@ export const deleteMachine = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export const getMachineSalesSummary = async (req, res) => {
+    try {
+        const machines = await Machine.find().sort({ name: 1 });
+        
+        const ranges = {
+            today: getDateRange("today"),
+            seven: getDateRange("7"),
+            fifteen: getDateRange("15"),
+            thirty: getDateRange("30")
+        };
+
+        const [todaySales, sevenSales, fifteenSales, thirtySales] = await Promise.all([
+            getSalesForPeriod(ranges.today.startDate, ranges.today.endDate),
+            getSalesForPeriod(ranges.seven.startDate, ranges.seven.endDate),
+            getSalesForPeriod(ranges.fifteen.startDate, ranges.fifteen.endDate),
+            getSalesForPeriod(ranges.thirty.startDate, ranges.thirty.endDate)
+        ]);
+
+        const mapSales = (salesList) => {
+            const map = {};
+            salesList.forEach(item => {
+                map[item._id.toString()] = item.totalFuelSold;
+            });
+            return map;
+        };
+
+        const todayMap = mapSales(todaySales);
+        const sevenMap = mapSales(sevenSales);
+        const fifteenMap = mapSales(fifteenSales);
+        const thirtyMap = mapSales(thirtySales);
+
+        const summary = machines.map(machine => {
+            const idStr = machine._id.toString();
+            return {
+                machineId: machine._id,
+                name: machine.name,
+                machineNumber: machine.machineNumber,
+                isActive: machine.isActive,
+                today: todayMap[idStr] || 0,
+                seven: sevenMap[idStr] || 0,
+                fifteen: fifteenMap[idStr] || 0,
+                thirty: thirtyMap[idStr] || 0
+            };
+        });
+
+        return res.status(200).json(summary);
+    } catch (error) {
+        console.log("Error in getMachineSalesSummary controller:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+const getSalesForPeriod = async (startDate, endDate) => {
+    return await Shift.aggregate([
+        {
+            $match: {
+                status: "COMPLETED",
+                endTime: { $gte: startDate, $lte: endDate }
+            }
+        },
+        {
+            $group: {
+                _id: "$machineId",
+                totalFuelSold: { $sum: "$totalFuelSold" }
+            }
+        }
+    ]);
+};

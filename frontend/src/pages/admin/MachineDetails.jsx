@@ -26,6 +26,7 @@ export default function MachineDetails() {
   const [machineOpen, setMachineOpen] = useState(false);
   const [deleteMachineConfirm, setDeleteMachineConfirm] = useState(false);
   const [deleteNozzleConfirm, setDeleteNozzleConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [editingNozzle, setEditingNozzle] = useState(null);
   const [nozzleForm, setNozzleForm] = useState(blankNozzle);
   const [machineForm, setMachineForm] = useState(blankMachine);
@@ -205,6 +206,7 @@ export default function MachineDetails() {
   };
 
   const deleteMachine = async () => {
+    setDeleting(true);
     try {
       await machineApi.remove(id);
       showSuccessToast("Machine deleted successfully");
@@ -212,6 +214,8 @@ export default function MachineDetails() {
       navigate("/admin/machines");
     } catch (err) {
       showErrorToast(apiErrorMessage(err, "Unable to delete machine"));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -231,13 +235,16 @@ export default function MachineDetails() {
 
   const deleteNozzle = async () => {
     if (!deleteNozzleConfirm) return;
+    setDeleting(true);
     try {
       await machineApi.removeNozzle(id, deleteNozzleConfirm._id);
       setNozzles((prev) => prev.filter((item) => item._id !== deleteNozzleConfirm._id));
       showSuccessToast("Nozzle deleted successfully");
       setDeleteNozzleConfirm(null);
     } catch (err) {
-      showErrorToast(apiErrorMessage(err, "Unable to delete nozzle"));
+      showErrorToast(err || "Unable to delete nozzle");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -508,8 +515,9 @@ export default function MachineDetails() {
         onClose={() => setDeleteMachineConfirm(false)}
         onCancel={() => setDeleteMachineConfirm(false)}
         onConfirm={deleteMachine}
+        loading={deleting}
         title="Delete Machine"
-        message="Are you sure you want to delete this machine? This will also remove all its nozzles. This action cannot be undone."
+        message="Are you sure you want to delete this machine? This action cannot be undone."
         confirmText="Delete Machine"
       />
 
@@ -518,6 +526,7 @@ export default function MachineDetails() {
         onClose={() => setDeleteNozzleConfirm(null)}
         onCancel={() => setDeleteNozzleConfirm(null)}
         onConfirm={deleteNozzle}
+        loading={deleting}
         title="Delete Nozzle"
         message={`Are you sure you want to delete nozzle ${deleteNozzleConfirm?.nozzleNumber}? This action cannot be undone.`}
         confirmText="Delete Nozzle"

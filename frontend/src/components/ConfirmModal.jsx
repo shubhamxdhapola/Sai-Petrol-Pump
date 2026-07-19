@@ -2,18 +2,19 @@ import React from 'react';
 import Modal from './Modal';
 import { FiAlertTriangle } from 'react-icons/fi';
 
-export default function ConfirmModal({ open, title, message, onConfirm, onCancel, confirmText = 'Delete', isDanger = true }) {
+export default function ConfirmModal({ open, title, message, onConfirm, onCancel, confirmText = 'Delete', isDanger = true, loading = false }) {
   const footer = (
     <>
-      <button type="button" onClick={onCancel} className="btn-secondary">
+      <button type="button" onClick={onCancel} className="btn-secondary" disabled={loading}>
         Cancel
       </button>
       <button 
         type="button" 
         onClick={onConfirm} 
-        className={isDanger ? "btn-primary bg-red-600 hover:bg-red-700 border-red-600 focus:ring-red-500" : "btn-primary"}
+        disabled={loading}
+        className={isDanger ? "btn-primary bg-red-600 hover:bg-red-700 border-red-600 focus:ring-red-500 disabled:bg-red-400" : "btn-primary"}
       >
-        {confirmText}
+        {loading ? "Deleting..." : confirmText}
       </button>
     </>
   );

@@ -46,6 +46,7 @@ export default function Tanks() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState(blank);
   const [fuelFilter, setFuelFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -201,12 +202,15 @@ export default function Tanks() {
 
   const remove = async () => {
     if (!deleteConfirm) return;
+    setDeleting(true);
     try {
       await dispatch(deleteTank(deleteConfirm._id)).unwrap();
       showSuccessToast("Tank deleted successfully");
       setDeleteConfirm(null);
     } catch (err) {
       showErrorToast(err || "Unable to delete tank");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -532,8 +536,9 @@ export default function Tanks() {
         onClose={() => setDeleteConfirm(null)}
         onCancel={() => setDeleteConfirm(null)}
         onConfirm={remove}
+        loading={deleting}
         title="Delete Tank"
-        message={`Are you sure you want to delete ${deleteConfirm?.name}? This action cannot be undone.`}
+        message={`Are you sure you want to delete "${deleteConfirm?.name}"? This action cannot be undone.`}
         confirmText="Delete Tank"
       />
     </>

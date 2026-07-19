@@ -197,12 +197,7 @@ export default function AppLayout({ role = "admin" }) {
           </button>
           <div className="hidden lg:block" />
           <div className="flex min-w-0 items-center gap-4">
-            {role === "employee" && (
-              <div className="hidden items-center gap-2 text-sm font-semibold md:flex mr-2">
-                <FiClock />
-                Live
-              </div>
-            )}
+
             <button
               onClick={handleLogout}
               className="btn-secondary flex items-center gap-2 text-red-500 hover:bg-red-50 hover:text-red-600 transition px-4 py-2.5"

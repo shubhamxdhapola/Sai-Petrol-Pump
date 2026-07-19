@@ -42,6 +42,7 @@ export default function Employees() {
 
   const [ongoingShifts, setOngoingShifts] = useState([]);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [status, setStatus] = useState("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -195,12 +196,15 @@ export default function Employees() {
 
   const remove = async () => {
     if (!deleteConfirm) return;
+    setDeleting(true);
     try {
       await dispatch(deleteEmployee(deleteConfirm._id)).unwrap();
       showSuccessToast("Employee deleted successfully");
       setDeleteConfirm(null);
     } catch (err) {
       showErrorToast(err || "Unable to delete employee");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -414,8 +418,9 @@ export default function Employees() {
         onClose={() => setDeleteConfirm(null)}
         onCancel={() => setDeleteConfirm(null)}
         onConfirm={remove}
+        loading={deleting}
         title="Delete Employee"
-        message={`Are you sure you want to delete employee "${deleteConfirm?.name}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete "${deleteConfirm?.name}"? This action cannot be undone.`}
         confirmText="Delete Employee"
       />
     </>

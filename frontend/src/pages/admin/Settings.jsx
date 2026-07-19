@@ -135,52 +135,46 @@ export default function Settings() {
         title="Settings"
         subtitle="Manage your profile details and security configurations"
       />
-      <div className="grid gap-6 md:grid-cols-4">
-        {/* Navigation Sidebar */}
-        <section className="soft-card h-fit p-3 md:col-span-1">
-          <nav className="flex flex-row gap-1.5 overflow-x-auto md:flex-col">
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`flex w-full items-center justify-between gap-3 rounded-lg px-4 py-3.5 text-sm font-semibold transition ${
-                activeTab === "profile"
-                  ? "bg-brand text-white shadow-md shadow-blue-500/10"
-                  : "text-muted hover:bg-slate-50 hover:text-ink"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <FiUser className="text-base" />
-                <span>Update Profile</span>
-              </div>
-              <FiChevronRight className={`hidden md:block text-xs ${activeTab === "profile" ? "text-white" : "text-slate-400"}`} />
-            </button>
+      {/* Horizontal Tabs Navigation */}
+      <div className="mt-6 border-b border-slate-200">
+        <nav className="flex gap-6 -mb-px">
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`flex items-center gap-2 pb-4 text-sm font-semibold border-b-2 transition-all duration-200 ${
+              activeTab === "profile"
+                ? "border-brand text-brand"
+                : "border-transparent text-muted hover:text-ink hover:border-slate-300"
+            }`}
+          >
+            <FiUser className="text-base" />
+            <span>Update Profile</span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab("password")}
-              className={`flex w-full items-center justify-between gap-3 rounded-lg px-4 py-3.5 text-sm font-semibold transition ${
-                activeTab === "password"
-                  ? "bg-brand text-white shadow-md shadow-blue-500/10"
-                  : "text-muted hover:bg-slate-50 hover:text-ink"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <FiLock className="text-base" />
-                <span>Update Password</span>
-              </div>
-              <FiChevronRight className={`hidden md:block text-xs ${activeTab === "password" ? "text-white" : "text-slate-400"}`} />
-            </button>
-          </nav>
-        </section>
+          <button
+            onClick={() => setActiveTab("password")}
+            className={`flex items-center gap-2 pb-4 text-sm font-semibold border-b-2 transition-all duration-200 ${
+              activeTab === "password"
+                ? "border-brand text-brand"
+                : "border-transparent text-muted hover:text-ink hover:border-slate-300"
+            }`}
+          >
+            <FiLock className="text-base" />
+            <span>Update Password</span>
+          </button>
+        </nav>
+      </div>
 
-        {/* Content Area */}
-        <section className="soft-card p-6 sm:p-8 md:col-span-3">
+      {/* Form Content Area */}
+      <div className="mt-8">
+        <section className="soft-card !rounded-2xl p-6 sm:p-8 border border-slate-200 bg-white shadow-sm max-w-3xl">
           {activeTab === "profile" ? (
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-4 border-b border-slate-100 pb-5">
-                <div className="grid h-12 w-12 place-items-center rounded-full bg-blue-100 text-xl text-brand">
+            <div className="w-full">
+              <div className="flex items-center gap-4 border-b border-slate-100 pb-6">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-xl text-brand border border-blue-100/50 shadow-xs">
                   <FiUser />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">Profile Details</h2>
+                  <h2 className="text-xl font-bold text-slate-800">Profile Details</h2>
                   <p className="text-sm text-muted">Update your personal account information</p>
                 </div>
               </div>
@@ -209,20 +203,20 @@ export default function Settings() {
                   required
                 />
                 <div className="flex justify-start pt-2">
-                  <button className="btn-primary px-8" disabled={updatingProfile}>
+                  <button className="btn-primary px-8 shadow-md hover:shadow-lg transition-all duration-200" disabled={updatingProfile}>
                     {updatingProfile ? "Updating Profile..." : "Update Profile"}
                   </button>
                 </div>
               </form>
             </div>
           ) : (
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-4 border-b border-slate-100 pb-5">
-                <div className="grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-xl text-emerald-600">
+            <div className="w-full">
+              <div className="flex items-center gap-4 border-b border-slate-100 pb-6">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-emerald-50 text-xl text-emerald-600 border border-emerald-100/50 shadow-xs">
                   <FiLock />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">Security Settings</h2>
+                  <h2 className="text-xl font-bold text-slate-800">Security Settings</h2>
                   <p className="text-sm text-muted">Update your login password</p>
                 </div>
               </div>
@@ -250,15 +244,24 @@ export default function Settings() {
                   }
                   required
                 />
-                <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-5 text-sm">
-                  <strong className="text-slate-700">Password requirements:</strong>
-                  <ul className="mt-3 list-disc space-y-2 pl-5 text-muted">
-                    <li>At least 4 characters</li>
-                    <li>Maximum 20 characters</li>
+                
+                <div className="rounded-xl border border-blue-100 bg-blue-50/20 p-5 text-sm">
+                  <strong className="text-slate-800 font-semibold flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-600"></span>
+                    Password requirements:
+                  </strong>
+                  <ul className="mt-3 space-y-2 text-muted list-inside pl-3">
+                    <li className="flex items-center gap-2">
+                      <span className="text-blue-500">•</span> At least 4 characters
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-blue-500">•</span> Maximum 20 characters
+                    </li>
                   </ul>
                 </div>
+
                 <div className="flex justify-start pt-2">
-                  <button className="btn-primary px-8" disabled={savingPassword}>
+                  <button className="btn-primary px-8 shadow-md hover:shadow-lg transition-all duration-200" disabled={savingPassword}>
                     {savingPassword ? "Updating Password..." : "Update Password"}
                   </button>
                 </div>

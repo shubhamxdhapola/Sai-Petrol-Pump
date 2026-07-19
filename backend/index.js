@@ -19,7 +19,18 @@ const PORT = process.env.PORT
 app.use(express.json());
 app.use(cookieParser())
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const isVercel = origin.endsWith('.vercel.app');
+        const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+        const isClientUrl = process.env.CLIENT_URL && (origin === process.env.CLIENT_URL.replace(/\/$/, "") || origin === process.env.CLIENT_URL);
+        
+        if (isVercel || isLocalhost || isClientUrl) {
+            callback(null, true);
+        } else {
+            callback(null, false);
+        }
+    },
     credentials: true
 }))
 
