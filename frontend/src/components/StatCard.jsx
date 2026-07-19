@@ -14,7 +14,9 @@ export default function StatCard({ icon, label, value, hint, accent = 'blue', su
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-muted">{label}</p>
-        <p className="mt-2 break-words text-xl font-bold text-ink md:text-2xl">{value}{suffix}</p>
+        <p className="mt-1 truncate text-lg font-bold text-ink sm:text-xl lg:text-2xl xl:text-base 2xl:text-xl" title={`${value}${suffix || ''}`}>
+          {value}{suffix}
+        </p>
         {hint && <p className="mt-2 text-sm text-muted">{hint}</p>}
       </div>
     </div>

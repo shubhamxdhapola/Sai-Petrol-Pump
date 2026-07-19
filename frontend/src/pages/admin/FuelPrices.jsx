@@ -22,7 +22,11 @@ import {
 } from "../../redux/slices/fuelPrice.slice";
 import { dateTime, rupee } from "../../utils/formatters";
 import { showErrorToast, showSuccessToast } from "../../utils/helper";
-import { CardSkeleton, ChartSkeleton, TableSkeleton } from "../../components/Skeletons";
+import {
+  CardSkeleton,
+  ChartSkeleton,
+  TableSkeleton,
+} from "../../components/Skeletons";
 import Pagination from "../../components/Pagination";
 
 const PriceTooltip = ({ active, payload, label }) => {
@@ -34,11 +38,16 @@ const PriceTooltip = ({ active, payload, label }) => {
         </p>
         <div className="space-y-2">
           {payload.map((entry, idx) => (
-            <div key={idx} className="flex items-center justify-between gap-4 text-sm font-semibold">
+            <div
+              key={idx}
+              className="flex items-center justify-between gap-4 text-sm font-semibold"
+            >
               <div className="flex items-center gap-2">
-                <span 
-                  className="h-2.5 w-2.5 rounded-full" 
-                  style={{ backgroundColor: entry.color || entry.stroke || "#000" }}
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{
+                    backgroundColor: entry.color || entry.stroke || "#000",
+                  }}
                 />
                 <span className="text-slate-600">{entry.name}</span>
               </div>
@@ -139,7 +148,9 @@ export default function FuelPrices() {
         addFuelPrice({
           fuelType: fuel,
           price: prVal,
-          ...(form.effectiveFrom ? { effectiveFrom: new Date(form.effectiveFrom).toISOString() } : {}),
+          ...(form.effectiveFrom
+            ? { effectiveFrom: new Date(form.effectiveFrom).toISOString() }
+            : {}),
         }),
       ).unwrap();
       dispatch(getCurrentFuelPrices());
@@ -180,8 +191,16 @@ export default function FuelPrices() {
             const isPremium = fuel === "PREMIUM";
             const isDiesel = fuel === "DIESEL";
             const fuelLabel = isPremium ? "PREMIUM PETROL" : fuel;
-            const themeColor = isPremium ? "text-purple-600" : isDiesel ? "text-blue-600" : "text-emerald-600";
-            const bgColor = isPremium ? "bg-purple-50" : isDiesel ? "bg-blue-50" : "bg-emerald-50";
+            const themeColor = isPremium
+              ? "text-purple-600"
+              : isDiesel
+                ? "text-blue-600"
+                : "text-emerald-600";
+            const bgColor = isPremium
+              ? "bg-purple-50"
+              : isDiesel
+                ? "bg-blue-50"
+                : "bg-emerald-50";
 
             return (
               <section
@@ -191,21 +210,19 @@ export default function FuelPrices() {
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-b border-slate-100">
                   <div className="flex items-center gap-2.5">
-                    <span className={`inline-block p-2 rounded-lg ${bgColor} ${themeColor}`}>
+                    <span
+                      className={`inline-block p-2 rounded-lg ${bgColor} ${themeColor}`}
+                    >
                       <MdOutlineLocalGasStation className="text-xl" />
                     </span>
-                    <h2 className={`text-base font-extrabold tracking-wider ${themeColor}`}>
+                    <h2
+                      className={`text-base font-extrabold tracking-wider ${themeColor}`}
+                    >
                       {fuelLabel}
                     </h2>
                   </div>
                   <Badge
-                    tone={
-                      isDiesel
-                        ? "blue"
-                        : isPremium
-                          ? "purple"
-                          : "green"
-                    }
+                    tone={isDiesel ? "blue" : isPremium ? "purple" : "green"}
                   >
                     Active
                   </Badge>
@@ -220,13 +237,17 @@ export default function FuelPrices() {
                     <span className="text-3xl font-black text-slate-800">
                       {price ? rupee(price.price) : "—"}
                     </span>
-                    <span className="text-sm font-bold text-slate-500">/ Litre</span>
+                    <span className="text-sm font-bold text-slate-500">
+                      / Litre
+                    </span>
                   </div>
                 </div>
 
                 {/* Footer */}
                 <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/30 flex items-center justify-between text-xs text-slate-500">
-                  <span className="font-medium text-slate-400">Effective From</span>
+                  <span className="font-medium text-slate-400">
+                    Effective From
+                  </span>
                   <span className="font-semibold text-slate-700">
                     {price ? dateTime(price.effectiveFrom) : "—"}
                   </span>
@@ -258,86 +279,116 @@ export default function FuelPrices() {
           <div className="overflow-x-auto pb-4">
             <div className="h-72 min-w-[700px]">
               <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ left: 8, right: 16, top: 10, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorPetrol" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorDiesel" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0068ff" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#0068ff" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorPremium" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="4 4"
-                  vertical={false}
-                  stroke="#f1f5f9"
-                />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 11, fill: "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tickFormatter={(val) => `₹${val}`}
-                  width={56}
-                  tick={{ fontSize: 11, fill: "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip content={<PriceTooltip />} />
-                {(!fuelFilter || fuelFilter === "PETROL") && (
-                  <Area
-                    type="monotone"
-                    dataKey="petrolPrice"
-                    stroke="#10b981"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorPetrol)"
-                    connectNulls
-                    name="Petrol"
-                    activeDot={{ r: 5, strokeWidth: 0, fill: "#10b981" }}
+                <AreaChart
+                  data={chartData}
+                  margin={{ left: 8, right: 16, top: 10, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="colorPetrol"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#10b981"
+                        stopOpacity={0.15}
+                      />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient
+                      id="colorDiesel"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#0068ff"
+                        stopOpacity={0.15}
+                      />
+                      <stop offset="95%" stopColor="#0068ff" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient
+                      id="colorPremium"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#8b5cf6"
+                        stopOpacity={0.15}
+                      />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="4 4"
+                    vertical={false}
+                    stroke="#f1f5f9"
                   />
-                )}
-                {(!fuelFilter || fuelFilter === "DIESEL") && (
-                  <Area
-                    type="monotone"
-                    dataKey="dieselPrice"
-                    stroke="#0068ff"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorDiesel)"
-                    connectNulls
-                    name="Diesel"
-                    activeDot={{ r: 5, strokeWidth: 0, fill: "#0068ff" }}
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: "#64748b" }}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                )}
-                {(!fuelFilter || fuelFilter === "PREMIUM") && (
-                  <Area
-                    type="monotone"
-                    dataKey="premiumPrice"
-                    stroke="#8b5cf6"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorPremium)"
-                    connectNulls
-                    name="Premium Petrol"
-                    activeDot={{ r: 5, strokeWidth: 0, fill: "#8b5cf6" }}
+                  <YAxis
+                    tickFormatter={(val) => `₹${val}`}
+                    width={56}
+                    tick={{ fontSize: 11, fill: "#64748b" }}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                )}
-              </AreaChart>
-            </ResponsiveContainer>
+                  <Tooltip content={<PriceTooltip />} />
+                  {(!fuelFilter || fuelFilter === "PETROL") && (
+                    <Area
+                      type="monotone"
+                      dataKey="petrolPrice"
+                      stroke="#10b981"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorPetrol)"
+                      connectNulls
+                      name="Petrol"
+                      activeDot={{ r: 5, strokeWidth: 0, fill: "#10b981" }}
+                    />
+                  )}
+                  {(!fuelFilter || fuelFilter === "DIESEL") && (
+                    <Area
+                      type="monotone"
+                      dataKey="dieselPrice"
+                      stroke="#0068ff"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorDiesel)"
+                      connectNulls
+                      name="Diesel"
+                      activeDot={{ r: 5, strokeWidth: 0, fill: "#0068ff" }}
+                    />
+                  )}
+                  {(!fuelFilter || fuelFilter === "PREMIUM") && (
+                    <Area
+                      type="monotone"
+                      dataKey="premiumPrice"
+                      stroke="#8b5cf6"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorPremium)"
+                      connectNulls
+                      name="Premium Petrol"
+                      activeDot={{ r: 5, strokeWidth: 0, fill: "#8b5cf6" }}
+                    />
+                  )}
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
         )}
       </section>
       <section className="table-wrap mt-5">
@@ -354,25 +405,30 @@ export default function FuelPrices() {
                 </tr>
               </thead>
               <tbody>
-                {history?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((price) => (
-                  <tr key={price._id} className="border-t border-slate-200">
-                    <td className="p-4">
-                      <Badge
-                        tone={
-                          price.fuelType === "PREMIUM"
-                            ? "purple"
-                            : price.fuelType === "DIESEL"
-                              ? "blue"
-                              : "green"
-                        }
-                      >
-                        {price.fuelType}
-                      </Badge>
-                    </td>
-                    <td className="font-bold">{rupee(price.price)} / L</td>
-                    <td>{dateTime(price.effectiveFrom)}</td>
-                  </tr>
-                ))}
+                {history
+                  ?.slice(
+                    (currentPage - 1) * itemsPerPage,
+                    currentPage * itemsPerPage,
+                  )
+                  .map((price) => (
+                    <tr key={price._id} className="border-t border-slate-200">
+                      <td className="p-4">
+                        <Badge
+                          tone={
+                            price.fuelType === "PREMIUM"
+                              ? "purple"
+                              : price.fuelType === "DIESEL"
+                                ? "blue"
+                                : "green"
+                          }
+                        >
+                          {price.fuelType}
+                        </Badge>
+                      </td>
+                      <td className="font-bold">{rupee(price.price)} / L</td>
+                      <td>{dateTime(price.effectiveFrom)}</td>
+                    </tr>
+                  ))}
                 {!history?.length && (
                   <tr>
                     <td colSpan="3" className="p-8 text-center text-muted">

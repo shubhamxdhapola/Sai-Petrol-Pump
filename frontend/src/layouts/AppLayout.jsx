@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
@@ -59,6 +59,32 @@ export default function AppLayout({ role = "admin" }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [desktopSidebarExpanded, setDesktopSidebarExpanded] = useState(false);
+  const mobileSidebarRef = useRef(null);
+  const menuBtnRef = useRef(null);
+
+  // Automatically close mobile sidebar when the route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Click outside handler to close mobile menu
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        sidebarOpen &&
+        mobileSidebarRef.current &&
+        !mobileSidebarRef.current.contains(event.target) &&
+        (!menuBtnRef.current || !menuBtnRef.current.contains(event.target))
+      ) {
+        setSidebarOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebarOpen]);
+
   const nav = role === "admin" ? adminNav : employeeNav;
   const displayUser =
     user ||
@@ -143,6 +169,7 @@ export default function AppLayout({ role = "admin" }) {
           onClick={closeSidebar}
         />
         <aside
+          ref={mobileSidebarRef}
           className={`relative z-50 flex h-full w-[290px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <button
@@ -161,6 +188,7 @@ export default function AppLayout({ role = "admin" }) {
       >
         <header className="sticky top-0 z-20 flex h-[92px] items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur lg:px-10">
           <button
+            ref={menuBtnRef}
             onClick={() => setSidebarOpen(true)}
             className="text-3xl text-ink lg:hidden"
             aria-label="Open sidebar"

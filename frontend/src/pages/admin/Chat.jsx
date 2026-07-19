@@ -14,7 +14,7 @@ import {
   FiPlus,
   FiMessageSquare,
   FiSidebar,
-  FiX
+  FiX,
 } from "react-icons/fi";
 import { aiApi, apiErrorMessage } from "../../utils/api";
 
@@ -30,7 +30,7 @@ function MarkdownResponse({ content, isNew, onComplete }) {
 
     let index = 0;
     const words = content.split(" ");
-    
+
     if (words.length === 0) {
       if (onComplete) onComplete();
       return;
@@ -61,13 +61,22 @@ function MarkdownResponse({ content, isNew, onComplete }) {
         remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ node, ...props }) => (
-            <h1 className="text-lg font-bold mt-4 mb-2 text-ink border-b pb-1 border-slate-100" {...props} />
+            <h1
+              className="text-lg font-bold mt-4 mb-2 text-ink border-b pb-1 border-slate-100"
+              {...props}
+            />
           ),
           h2: ({ node, ...props }) => (
-            <h2 className="text-md font-bold mt-3 mb-1.5 text-ink border-b pb-0.5 border-slate-50" {...props} />
+            <h2
+              className="text-md font-bold mt-3 mb-1.5 text-ink border-b pb-0.5 border-slate-50"
+              {...props}
+            />
           ),
           h3: ({ node, ...props }) => (
-            <h3 className="text-sm font-semibold mt-2 mb-1 text-ink" {...props} />
+            <h3
+              className="text-sm font-semibold mt-2 mb-1 text-ink"
+              {...props}
+            />
           ),
           p: ({ node, ...props }) => (
             <p className="leading-relaxed mb-2.5" {...props} />
@@ -89,20 +98,32 @@ function MarkdownResponse({ content, isNew, onComplete }) {
           ),
           table: ({ node, ...props }) => (
             <div className="overflow-x-auto my-3 rounded-lg border border-slate-200 shadow-sm">
-              <table className="w-full border-collapse text-xs text-left" {...props} />
+              <table
+                className="w-full border-collapse text-xs text-left"
+                {...props}
+              />
             </div>
           ),
           thead: ({ node, ...props }) => (
-            <thead className="bg-slate-50 text-ink uppercase border-b border-slate-200 font-semibold" {...props} />
+            <thead
+              className="bg-slate-50 text-ink uppercase border-b border-slate-200 font-semibold"
+              {...props}
+            />
           ),
           th: ({ node, ...props }) => (
             <th className="px-3 py-2 text-slate-700 font-bold" {...props} />
           ),
           td: ({ node, ...props }) => (
-            <td className="px-3 py-2 border-b border-slate-100 text-slate-600" {...props} />
+            <td
+              className="px-3 py-2 border-b border-slate-100 text-slate-600"
+              {...props}
+            />
           ),
           code: ({ node, ...props }) => (
-            <code className="bg-slate-100 text-rose-600 px-1 py-0.5 rounded font-mono text-xs" {...props} />
+            <code
+              className="bg-slate-100 text-rose-600 px-1 py-0.5 rounded font-mono text-xs"
+              {...props}
+            />
           ),
         }}
       >
@@ -130,7 +151,7 @@ export default function Chat() {
       id: "session-" + Date.now(),
       title: "New Chat",
       messages: [],
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
     return [initialSession];
   });
@@ -141,15 +162,42 @@ export default function Chat() {
     return sessions[0]?.id || "";
   });
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem("sai_chat_sidebar_open");
+    return saved !== null ? JSON.parse(saved) : false;
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
-  
+
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
+  const sidebarRef = useRef(null);
+  const toggleBtnRef = useRef(null);
 
-  const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0] || { messages: [] };
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        (!toggleBtnRef.current || !toggleBtnRef.current.contains(event.target))
+      ) {
+        setIsSidebarOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Sync sidebar open state to localStorage
+  useEffect(() => {
+    localStorage.setItem("sai_chat_sidebar_open", JSON.stringify(isSidebarOpen));
+  }, [isSidebarOpen]);
+
+  const activeSession = sessions.find((s) => s.id === activeSessionId) ||
+    sessions[0] || { messages: [] };
   const messages = activeSession.messages;
 
   const scrollToBottom = () => {
@@ -179,7 +227,7 @@ export default function Chat() {
       id: "session-" + Date.now(),
       title: "New Chat",
       messages: [],
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
     setSessions((prev) => [newSession, ...prev]);
     setActiveSessionId(newSession.id);
@@ -193,7 +241,7 @@ export default function Chat() {
         id: "session-" + Date.now(),
         title: "New Chat",
         messages: [],
-        createdAt: Date.now()
+        createdAt: Date.now(),
       };
       setSessions([resetSession]);
       setActiveSessionId(resetSession.id);
@@ -201,9 +249,9 @@ export default function Chat() {
       return;
     }
 
-    const filtered = sessions.filter(s => s.id !== sessionId);
+    const filtered = sessions.filter((s) => s.id !== sessionId);
     setSessions(filtered);
-    
+
     if (activeSessionId === sessionId) {
       setActiveSessionId(filtered[0]?.id || "");
     }
@@ -229,14 +277,17 @@ export default function Chat() {
       return prevSessions.map((session) => {
         if (session.id === activeSessionId) {
           const updatedMessages = [...session.messages, userMessage];
-          const updatedTitle = session.title === "New Chat" && session.messages.length === 0
-            ? (prompt.length > 25 ? prompt.substring(0, 25) + "..." : prompt)
-            : session.title;
-          
+          const updatedTitle =
+            session.title === "New Chat" && session.messages.length === 0
+              ? prompt.length > 25
+                ? prompt.substring(0, 25) + "..."
+                : prompt
+              : session.title;
+
           return {
             ...session,
             title: updatedTitle,
-            messages: updatedMessages
+            messages: updatedMessages,
           };
         }
         return session;
@@ -247,20 +298,20 @@ export default function Chat() {
 
     try {
       const response = await aiApi.chat(prompt);
-      
+
       const aiMessage = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
         text: response.reply || "No response received.",
         isAnimated: false,
       };
-      
+
       setSessions((prevSessions) => {
         return prevSessions.map((session) => {
           if (session.id === activeSessionId) {
             return {
               ...session,
-              messages: [...session.messages, aiMessage]
+              messages: [...session.messages, aiMessage],
             };
           }
           return session;
@@ -268,7 +319,8 @@ export default function Chat() {
       });
     } catch (error) {
       const errorMsg = apiErrorMessage(error).toLowerCase();
-      const isQuota = error?.response?.status === 429 || 
+      const isQuota =
+        error?.response?.status === 429 ||
         errorMsg.includes("quota") ||
         errorMsg.includes("exhausted") ||
         errorMsg.includes("429") ||
@@ -277,23 +329,31 @@ export default function Chat() {
 
       const errorText = isQuota
         ? "⚠️ **API Quota Exceeded:** The AI Assistant is receiving too many requests, and the Google Gemini API query limits have been reached. Please wait a minute and try again."
-        : "**Error:** " + apiErrorMessage(error, "Failed to connect to the server. Please try again.");
+        : "**Error:** " +
+          apiErrorMessage(
+            error,
+            "Failed to connect to the server. Please try again.",
+          );
 
-      toast.error(isQuota ? "API Quota Exceeded" : apiErrorMessage(error, "Failed to get response from SaiBot."));
-      
+      toast.error(
+        isQuota
+          ? "API Quota Exceeded"
+          : apiErrorMessage(error, "Failed to get response from SaiBot."),
+      );
+
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
         text: errorText,
         isAnimated: true,
       };
-      
+
       setSessions((prevSessions) => {
         return prevSessions.map((session) => {
           if (session.id === activeSessionId) {
             return {
               ...session,
-              messages: [...session.messages, errorMessage]
+              messages: [...session.messages, errorMessage],
             };
           }
           return session;
@@ -317,7 +377,7 @@ export default function Chat() {
       return prevSessions.map((session) => {
         if (session.id === activeSessionId) {
           const updated = session.messages.map((msg) =>
-            msg.id === id ? { ...msg, isAnimated: true } : msg
+            msg.id === id ? { ...msg, isAnimated: true } : msg,
           );
           return { ...session, messages: updated };
         }
@@ -355,7 +415,6 @@ export default function Chat() {
 
   return (
     <div className="w-full flex h-[calc(100vh-92px)] bg-white overflow-hidden relative">
-      
       {/* Mobile Backdrop Overlay */}
       {isSidebarOpen && (
         <div
@@ -391,6 +450,7 @@ export default function Chat() {
           {/* Sidebar Toggle when collapsed (now on the right of the header!) */}
           {!isSidebarOpen && (
             <button
+              ref={toggleBtnRef}
               onClick={() => setIsSidebarOpen(true)}
               title="Open sidebar"
               className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-ink transition shrink-0"
@@ -411,7 +471,9 @@ export default function Chat() {
                     Welcome to Sai AI
                   </h2>
                   <p className="mt-3 text-sm font-semibold text-muted leading-relaxed max-w-xl mx-auto px-2">
-                    Ask a question to analyze operations, calculate fuel sales, check tanks, or summarize shifts. Select a task below or chat:
+                    Ask a question to analyze operations, calculate fuel sales,
+                    check tanks, or summarize shifts. Select a task below or
+                    chat:
                   </p>
                 </div>
 
@@ -426,14 +488,18 @@ export default function Chat() {
                         className="group flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`rounded-lg p-2.5 shrink-0 transition duration-200 ${item.bg}`}>
+                          <div
+                            className={`rounded-lg p-2.5 shrink-0 transition duration-200 ${item.bg}`}
+                          >
                             <Icon className="text-base" />
                           </div>
                           <span className="text-sm font-bold text-ink group-hover:text-brand transition duration-200">
                             {item.title}
                           </span>
                         </div>
-                        <span className="text-slate-400 font-light text-xl leading-none group-hover:text-brand transition duration-200 pr-1">+</span>
+                        <span className="text-slate-400 font-light text-xl leading-none group-hover:text-brand transition duration-200 pr-1">
+                          +
+                        </span>
                       </button>
                     );
                   })}
@@ -568,7 +634,8 @@ export default function Chat() {
               </button>
             </form>
             <p className="mt-2.5 text-center text-[10px] font-semibold text-muted select-none">
-              SaiBot may generate inaccurate information about shifts, refills, or sales. Double check critical metrics.
+              SaiBot may generate inaccurate information about shifts, refills,
+              or sales. Double check critical metrics.
             </p>
           </div>
         </footer>
@@ -576,6 +643,7 @@ export default function Chat() {
 
       {/* Collapsible Chat History Sidebar (Right side) */}
       <div
+        ref={sidebarRef}
         className={`transition-all duration-300 border-l border-slate-100 bg-white lg:bg-slate-50/30 flex flex-col shrink-0 z-30
           ${isSidebarOpen ? "w-64 border-l" : "w-0 overflow-hidden border-l-0"}
           absolute lg:relative right-0 top-0 bottom-0 h-full shadow-2xl lg:shadow-none
@@ -627,7 +695,7 @@ export default function Chat() {
                   />
                   <span className="truncate pr-2">{session.title}</span>
                 </div>
-                
+
                 <button
                   onClick={(e) => handleDeleteSession(session.id, e)}
                   className="text-slate-400 hover:text-red-500 p-1 rounded transition opacity-0 group-hover:opacity-100 shrink-0"
@@ -647,7 +715,6 @@ export default function Chat() {
           </span>
         </div>
       </div>
-
     </div>
   );
 }
