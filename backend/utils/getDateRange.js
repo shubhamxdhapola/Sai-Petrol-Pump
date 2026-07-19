@@ -23,35 +23,42 @@ const getDateRange = (period, startDate, endDate) => {
     const month = nowIST.getUTCMonth();
     const date = nowIST.getUTCDate();
 
-    // Construct the end of today in IST
-    const endIST = Date.UTC(year, month, date, 23, 59, 59, 999);
-    const end = new Date(endIST - OFFSET_MS);
+    let startIST;
+    let endIST;
 
-    // Calculate days offset
-    let daysOffset = 0;
     switch (period) {
         case "today":
-            daysOffset = 0;
+            startIST = Date.UTC(year, month, date, 0, 0, 0, 0);
+            endIST = Date.UTC(year, month, date, 23, 59, 59, 999);
             break;
-        case "15":
-            daysOffset = 14;
-            break;
-        case "30":
-            daysOffset = 29;
+        case "yesterday":
+            startIST = Date.UTC(year, month, date - 1, 0, 0, 0, 0);
+            endIST = Date.UTC(year, month, date - 1, 23, 59, 59, 999);
             break;
         case "7":
+        case "week":
+            startIST = Date.UTC(year, month, date - 6, 0, 0, 0, 0);
+            endIST = Date.UTC(year, month, date, 23, 59, 59, 999);
+            break;
+        case "15":
+            startIST = Date.UTC(year, month, date - 14, 0, 0, 0, 0);
+            endIST = Date.UTC(year, month, date, 23, 59, 59, 999);
+            break;
+        case "30":
+        case "month":
+            startIST = Date.UTC(year, month, date - 29, 0, 0, 0, 0);
+            endIST = Date.UTC(year, month, date, 23, 59, 59, 999);
+            break;
         default:
-            daysOffset = 6;
+            // Default to last 7 days (including today)
+            startIST = Date.UTC(year, month, date - 6, 0, 0, 0, 0);
+            endIST = Date.UTC(year, month, date, 23, 59, 59, 999);
             break;
     }
 
-    // Construct the start of the period in IST
-    const startIST = Date.UTC(year, month, date - daysOffset, 0, 0, 0, 0);
-    const start = new Date(startIST - OFFSET_MS);
-
     return {
-        startDate: start,
-        endDate: end
+        startDate: new Date(startIST - OFFSET_MS),
+        endDate: new Date(endIST - OFFSET_MS)
     };
 };
 

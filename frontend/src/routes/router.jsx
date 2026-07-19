@@ -16,6 +16,8 @@ import EmployeeShifts from "../pages/employee/EmployeeShifts";
 import ChangePassword from "../pages/employee/ChangePassword";
 import Profile from "../pages/employee/Profile";
 import Settings from "../pages/admin/Settings";
+import Chat from "../pages/admin/Chat";
+
 
 const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/login" replace /> },
@@ -42,6 +44,7 @@ const router = createBrowserRouter([
           { path: "shifts", element: <Shifts /> },
           { path: "refills", element: <Refills /> },
           { path: "reports", element: <Reports /> },
+          { path: "chat", element: <Chat /> },
           { path: "settings", element: <Settings /> },
         ],
       },

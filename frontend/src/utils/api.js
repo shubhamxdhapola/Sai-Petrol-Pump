@@ -69,6 +69,10 @@ export const authApi = {
   changePassword: (payload) => axiosInstance.patch(API_PATHS.AUTH.CHANGE_PASSWORD, payload).then(extractData),
 };
 
+export const aiApi = {
+  chat: (message) => axiosInstance.post(API_PATHS.AI.CHAT, { message }).then(extractData),
+};
+
 export const downloadBlob = (response, fileName) => {
   const url = window.URL.createObjectURL(new Blob([response.data]));
   const link = document.createElement('a');

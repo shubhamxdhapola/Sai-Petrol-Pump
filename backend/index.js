@@ -11,6 +11,7 @@ import machineRoutes from './routes/machine.routes.js'
 import shiftRoutes from './routes/shift.routes.js'
 import reportRoutes from './routes/report.routes.js'
 import dashboardRoutes from './routes/dashboard.routes.js'
+import aiRoutes from './routes/ai.routes.js'
 
 const app = express();
 const PORT = process.env.PORT
@@ -30,6 +31,7 @@ app.use('/api/machines', machineRoutes)
 app.use('/api/shifts', shiftRoutes)
 app.use('/api/reports', reportRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/ai', aiRoutes)
 
 app.use((req, res) => {
     return res.status(404).json({

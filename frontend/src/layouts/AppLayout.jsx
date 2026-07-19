@@ -16,6 +16,7 @@ import {
   FiUsers,
   FiX,
   FiLogOut,
+  FiCpu,
 } from "react-icons/fi";
 import {
   TbGasStation,
@@ -37,6 +38,7 @@ const adminNav = [
   { to: "/admin/employees", label: "Employees", icon: FiUsers },
   { to: "/admin/refills", label: "Tank Refills", icon: TbTruckDelivery },
   { to: "/admin/reports", label: "Reports", icon: TbReportAnalytics },
+  { to: "/admin/chat", label: "AI Assistant", icon: FiCpu },
   { to: "/admin/settings", label: "Settings", icon: FiSettings },
 ];
 
@@ -182,7 +184,7 @@ export default function AppLayout({ role = "admin" }) {
             </button>
           </div>
         </header>
-        <main className="min-w-0 p-5 lg:p-10 overflow-x-hidden">
+        <main className={`min-w-0 overflow-x-hidden ${location.pathname === "/admin/chat" || location.pathname === "/admin/chat/" ? "p-0" : "p-5 lg:p-10"}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

@@ -354,9 +354,9 @@ export default function Employees() {
           </>
         )}
       </section>
-      <p className="mt-5 text-sm font-semibold text-muted">
+      {/* <p className="mt-5 text-sm font-semibold text-muted">
         Showing {filtered.length} of {items.length} employees
-      </p>
+      </p> */}
       <Modal
         open={open}
         onClose={() => setOpen(false)}

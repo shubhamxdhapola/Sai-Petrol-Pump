@@ -48,4 +48,8 @@ export const API_PATHS = {
   DASHBOARD: {
     GET: '/api/dashboard',
   },
+  AI: {
+    CHAT: '/api/ai/chat',
+  },
 };
+
