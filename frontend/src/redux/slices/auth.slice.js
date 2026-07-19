@@ -9,6 +9,9 @@ export const loginUser = createAsyncThunk(
       const { data } = await axiosInstance.post(
         API_PATHS.AUTH.LOGIN, credentials
       );
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
       return data.user;
     } catch (error) {
       return rejectWithValue(
@@ -22,6 +25,7 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   try {
     await axiosInstance.post(API_PATHS.AUTH.LOGOUT);
   } finally {
+    localStorage.removeItem('authToken');
     return null;
   }
 });
