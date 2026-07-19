@@ -129,15 +129,20 @@ export const getRevenueChart = async (startDate, endDate, period) => {
         }
     } else {
         const days = Number(period);
+        const formatter = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Kolkata",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        });
         for (let i = days - 1; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            const key = `${year}-${month}-${day}`;
+            const key = formatter.format(date);
             chart.push({
-                label: period === "7" ? date.toLocaleDateString("en-US", { weekday: "short" }) : date.toLocaleDateString("en-US", { day: "2-digit", month: "short" }),
+                label: period === "7" 
+                    ? date.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata", weekday: "short" }) 
+                    : date.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short" }),
                 revenue: revenueMap.get(key) || 0
             });
         }
@@ -188,16 +193,21 @@ export const getFuelSoldChart = async (startDate, endDate, period) => {
         }
     } else {
         const days = Number(period);
+        const formatter = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Kolkata",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        });
         for (let i = days - 1; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            const key = `${year}-${month}-${day}`;
+            const key = formatter.format(date);
             const values = fuelMap.get(key) || { petrol: 0, diesel: 0, premium: 0 };
             chart.push({
-                label: period === "7" ? date.toLocaleDateString("en-US", { weekday: "short" }) : date.toLocaleDateString("en-US", { day: "2-digit", month: "short" }),
+                label: period === "7" 
+                    ? date.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata", weekday: "short" }) 
+                    : date.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short" }),
                 petrol: values.petrol,
                 diesel: values.diesel,
                 premium: values.premium

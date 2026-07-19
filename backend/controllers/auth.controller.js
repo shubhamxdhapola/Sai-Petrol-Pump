@@ -25,7 +25,7 @@ export const login = async (req, res) => {
         }
 
         const token = generateToken(user._id, user?.tokenVersion)
-        saveCookie(token, res)
+        saveCookie(token, req, res)
 
         return res.status(200).json({
             user: {
@@ -46,10 +46,11 @@ export const login = async (req, res) => {
 
 export const logout = (req, res) => {
     try {
+        const isLocalhost = req.headers.host.includes('localhost') || req.headers.host.includes('127.0.0.1');
         res.clearCookie('token', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+            secure: !isLocalhost,
+            sameSite: isLocalhost ? "Lax" : "none",
         })
         res.status(200).json({ message: "Logged out successfully!" })
     } catch (error) {
