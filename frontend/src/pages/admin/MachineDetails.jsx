@@ -253,35 +253,39 @@ export default function MachineDetails() {
 
   return (
     <>
-      <div className="mb-8 flex flex-col justify-between gap-4 border-b border-slate-200 pb-8 lg:flex-row lg:items-center">
-        <div className="flex items-center gap-5">
+      <div className="mb-8 flex flex-col justify-between gap-6 border-b border-slate-200 pb-6 lg:flex-row lg:items-center">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-5">
           <Link to="/admin/machines" className="btn-secondary px-3">
             <FiArrowLeft />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold">Machine Details</h1>
-            <p className="mt-2 text-muted">
+            <h1 className="text-2xl font-bold text-slate-800">Machine Details</h1>
+            <p className="mt-1 text-sm text-slate-500 font-medium">
               View and manage machine information and nozzles
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => setMachineOpen(true)}
-            className="btn-secondary text-brand"
-          >
-            <FiEdit2 />
-            Edit Machine
-          </button>
-          <button
-            onClick={() => setDeleteMachineConfirm(true)}
-            className="btn-secondary text-red-500 hover:bg-red-50"
-          >
-            <FiTrash2 />
-            Delete Machine
-          </button>
-          <div className="flex items-center gap-3 font-semibold">
-            Active{" "}
+        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 sm:gap-4 w-full lg:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setMachineOpen(true)}
+              className="btn-secondary text-brand justify-center"
+              title="Edit Machine"
+            >
+              <FiEdit2 />
+              <span className="hidden sm:inline">Edit Machine</span>
+            </button>
+            <button
+              onClick={() => setDeleteMachineConfirm(true)}
+              className="btn-secondary text-red-500 hover:bg-red-50 justify-center"
+              title="Delete Machine"
+            >
+              <FiTrash2 />
+              <span className="hidden sm:inline">Delete Machine</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-3 font-semibold text-sm text-slate-700">
+            <span className="text-slate-500 sm:text-slate-700">Active</span>
             <Toggle checked={!!machine?.isActive} onChange={toggleMachine} />
           </div>
         </div>
@@ -291,37 +295,40 @@ export default function MachineDetails() {
           {error}
         </div>
       )}
-      <section className="soft-card p-7">
-        <div className="grid gap-6 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:items-center">
-          <div className="flex items-center gap-6">
-            <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-blue-100 text-brand">
-              <MdOutlineLocalGasStation className="text-4xl" />
+      <section className="soft-card p-6 !rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[2.5fr_1fr_1fr_1.5fr] lg:items-center">
+          <div className="flex items-center gap-5 col-span-full md:col-span-1 lg:col-span-1">
+            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-blue-50 text-brand border border-blue-100/50 shadow-xs">
+              <MdOutlineLocalGasStation className="text-3xl" />
             </div>
             <div className="min-w-0">
-              <h2 className="break-words text-3xl font-bold">
-                {machine?.name}{" "}
+              <h2 className="break-words text-xl font-extrabold text-slate-800 flex flex-wrap items-center gap-2">
+                {machine?.name}
                 <Badge tone={machine?.isActive ? "green" : "red"}>
                   {machine?.isActive ? "Active" : "Inactive"}
                 </Badge>
               </h2>
-              <p className="mt-3 text-muted">
+              <p className="mt-1 text-sm font-semibold text-slate-400">
                 Machine No. {machine?.machineNumber}
               </p>
             </div>
           </div>
-          <div>
-            <p className="text-sm text-muted">Total Nozzles</p>
-            <strong className="text-xl">{nozzles.length}</strong>
-          </div>
-          <div>
-            <p className="text-sm text-muted">Occupied</p>
-            <strong className="text-xl">
-              {nozzles.filter((n) => n.isOccupied).length}
-            </strong>
-          </div>
-          <div>
-            <p className="text-sm text-muted">Last Updated</p>
-            <strong>{dateTime(machine?.updatedAt)}</strong>
+
+          <div className="grid grid-cols-2 gap-4 col-span-full md:col-span-1 lg:contents">
+            <div className="rounded-xl border border-slate-100 bg-slate-50/20 p-3.5 lg:border-0 lg:bg-transparent lg:p-0">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Nozzles</p>
+              <strong className="mt-1 block text-lg font-extrabold text-slate-800">{nozzles.length}</strong>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-slate-50/20 p-3.5 lg:border-0 lg:bg-transparent lg:p-0">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Occupied</p>
+              <strong className="mt-1 block text-lg font-extrabold text-slate-800">
+                {nozzles.filter((n) => n.isOccupied).length}
+              </strong>
+            </div>
+            <div className="col-span-2 rounded-xl border border-slate-100 bg-slate-50/20 p-3.5 lg:col-span-1 lg:border-0 lg:bg-transparent lg:p-0">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Last Updated</p>
+              <strong className="mt-1 block text-sm font-bold text-slate-700">{dateTime(machine?.updatedAt)}</strong>
+            </div>
           </div>
         </div>
       </section>

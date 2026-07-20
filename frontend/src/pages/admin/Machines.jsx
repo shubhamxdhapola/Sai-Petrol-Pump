@@ -9,7 +9,12 @@ import Modal from "../../components/Modal";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import Toggle from "../../components/Toggle";
-import { getAllMachines, addMachine, updateMachine, deleteMachine } from "../../redux/slices/machine.slice";
+import {
+  getAllMachines,
+  addMachine,
+  updateMachine,
+  deleteMachine,
+} from "../../redux/slices/machine.slice";
 import { machineApi, apiErrorMessage } from "../../utils/api";
 import { number } from "../../utils/formatters";
 import ConfirmModal from "../../components/ConfirmModal";
@@ -21,7 +26,11 @@ const blank = { name: "", machineNumber: "" };
 
 export default function Machines() {
   const dispatch = useDispatch();
-  const { allMachines, fetchingMachines, error: reduxError } = useSelector((state) => state.machine);
+  const {
+    allMachines,
+    fetchingMachines,
+    error: reduxError,
+  } = useSelector((state) => state.machine);
   const items = allMachines || [];
   const loading = fetchingMachines;
 
@@ -44,13 +53,16 @@ export default function Machines() {
     setCurrentPage(1);
   }, [statusFilter]);
 
-  const error = localError || (typeof reduxError === 'string' ? reduxError : reduxError?.message);
+  const error =
+    localError ||
+    (typeof reduxError === "string" ? reduxError : reduxError?.message);
 
   useEffect(() => {
     dispatch(getAllMachines());
-    machineApi.salesSummary()
-      .then(data => setSalesSummary(data))
-      .catch(err => console.error("Error fetching sales summary:", err));
+    machineApi
+      .salesSummary()
+      .then((data) => setSalesSummary(data))
+      .catch((err) => console.error("Error fetching sales summary:", err));
   }, [dispatch]);
 
   useEffect(() => {
@@ -59,7 +71,7 @@ export default function Machines() {
       items.map(async (machine) => [
         machine._id,
         await machineApi.nozzles(machine._id).catch(() => []),
-      ])
+      ]),
     )
       .then((pairs) => setNozzlesByMachine(Object.fromEntries(pairs)))
       .catch(() => {});
@@ -124,9 +136,20 @@ export default function Machines() {
     }
 
     try {
-      if (editing) await dispatch(updateMachine({ id: editing._id, data: { name: nameTrim, machineNumber: machineNumberTrim } })).unwrap();
-      else await dispatch(addMachine({ name: nameTrim, machineNumber: machineNumberTrim })).unwrap();
-      showSuccessToast(editing ? "Machine updated successfully" : "Machine added successfully");
+      if (editing)
+        await dispatch(
+          updateMachine({
+            id: editing._id,
+            data: { name: nameTrim, machineNumber: machineNumberTrim },
+          }),
+        ).unwrap();
+      else
+        await dispatch(
+          addMachine({ name: nameTrim, machineNumber: machineNumberTrim }),
+        ).unwrap();
+      showSuccessToast(
+        editing ? "Machine updated successfully" : "Machine added successfully",
+      );
       setOpen(false);
     } catch (err) {
       showErrorToast(err || "Unable to save machine");
@@ -137,8 +160,12 @@ export default function Machines() {
 
   const toggleActive = async (machine, checked) => {
     try {
-      await dispatch(updateMachine({ id: machine._id, data: { isActive: checked } })).unwrap();
-      showSuccessToast(`Machine ${checked ? "activated" : "deactivated"} successfully`);
+      await dispatch(
+        updateMachine({ id: machine._id, data: { isActive: checked } }),
+      ).unwrap();
+      showSuccessToast(
+        `Machine ${checked ? "activated" : "deactivated"} successfully`,
+      );
     } catch (err) {
       showErrorToast(err || "Unable to update machine status");
     }
@@ -240,150 +267,176 @@ export default function Machines() {
           <CardSkeleton count={2} />
         ) : (
           <>
-            {filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((machine) => {
-              const machineNozzles = nozzlesByMachine[machine._id] || [];
-              const salesRecord = salesSummary.find(s => s.machineId === machine._id);
-              const fuelSoldVal = salesRecord ? salesRecord[periodFilter] : 0;
-              const periodLabel = {
-                today: "Today",
-                seven: "7 Days",
-                fifteen: "15 Days",
-                thirty: "30 Days"
-              }[periodFilter];
+            {filtered
+              .slice(
+                (currentPage - 1) * itemsPerPage,
+                currentPage * itemsPerPage,
+              )
+              .map((machine) => {
+                const machineNozzles = nozzlesByMachine[machine._id] || [];
+                const salesRecord = salesSummary.find(
+                  (s) => s.machineId === machine._id,
+                );
+                const fuelSoldVal = salesRecord ? salesRecord[periodFilter] : 0;
+                const periodLabel = {
+                  today: "Today",
+                  seven: "7 Days",
+                  fifteen: "15 Days",
+                  thirty: "30 Days",
+                }[periodFilter];
 
-              return (
-                <section key={machine._id} className="soft-card !rounded-2xl overflow-hidden border border-slate-200/80 bg-white shadow-xs">
-                  {/* Card Header Section */}
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 gap-6 border-b border-slate-100 bg-slate-50/30">
-                    {/* 1. Machine Info */}
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div
-                        className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl border ${machine.isActive ? "bg-blue-50 border-blue-100 text-brand" : "bg-red-50 border-red-100 text-red-500"}`}
-                      >
-                        <MdOutlineLocalGasStation className="text-xl" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="truncate text-base font-bold text-slate-800">
-                          {machine.name}
-                        </h3>
-                        <p className="text-xs text-muted font-medium mt-0.5">
-                          Machine No. {machine.machineNumber}
-                        </p>
-                        <div className="mt-2.5 flex items-center gap-2">
-                          <Badge tone={machine.isActive ? "green" : "red"}>
-                            {machine.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                          <Toggle
-                            checked={machine.isActive}
-                            onChange={(checked) => toggleActive(machine, checked)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 2. Connected Nozzles */}
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
-                      <div className="flex flex-col text-sm">
-                        <span className="text-xs text-muted font-semibold uppercase tracking-wider select-none">Connected Nozzles</span>
-                        <strong className="text-slate-800 text-base font-bold mt-0.5">{machineNozzles.length} Nozzles</strong>
-                      </div>
-                    </div>
-
-                    {/* 3. Fuel Sold */}
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
-                      <div className="flex flex-col text-sm">
-                        <span className="text-xs text-muted font-semibold uppercase tracking-wider select-none">Fuel Sold ({periodLabel})</span>
-                        <strong className="text-slate-800 text-base font-bold mt-0.5">{number(fuelSoldVal, 2)} L</strong>
-                      </div>
-                    </div>
-                    
-                    {/* 4. Action Buttons */}
-                    <div className="flex gap-2 mt-1 md:mt-0">
-                      <Link
-                        to={`/admin/machines/${machine._id}`}
-                        className="btn-secondary px-3 text-brand"
-                        title="View Details"
-                      >
-                        <FiInfo />
-                      </Link>
-                      <button
-                        onClick={() => openEdit(machine)}
-                        className="btn-secondary px-3 text-brand"
-                        title="Edit Machine"
-                      >
-                        <FiEdit2 />
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(machine)}
-                        className="btn-secondary px-3 text-red-500 hover:bg-red-50"
-                        title="Delete Machine"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Nozzles Grid Area */}
-                  <div className="p-6 bg-white">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-sm font-semibold text-slate-700 select-none">Dispenser Nozzles</span>
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600 select-none">
-                        {machineNozzles.length}
-                      </span>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {machineNozzles.map((nozzle) => (
+                return (
+                  <section
+                    key={machine._id}
+                    className="soft-card !rounded-xl overflow-hidden border border-slate-200/80 bg-white shadow-xs"
+                  >
+                    {/* Card Header Section */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 gap-6 border-b border-slate-100 bg-slate-50/30">
+                      {/* 1. Machine Info */}
+                      <div className="flex items-center gap-4 min-w-0">
                         <div
-                          key={nozzle._id}
-                          className="rounded-xl border border-slate-200/80 p-4 bg-white hover:shadow-xs transition"
+                          className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl border ${machine.isActive ? "bg-blue-50 border-blue-100 text-brand" : "bg-red-50 border-red-100 text-red-500"}`}
                         >
-                          <div className="flex items-center justify-between gap-3">
-                            <strong className="text-slate-800 font-bold text-sm">Nozzle {nozzle.nozzleNumber}</strong>
-                            <span className="text-xs font-bold text-slate-600">
-                              {number(nozzle.currentReading, 2)} L
-                            </span>
-                          </div>
-                          <div className="mt-3.5 flex flex-wrap gap-1.5">
-                            <Badge
-                              tone={
-                                nozzle.tankId?.fuelType === "PREMIUM"
-                                  ? "purple"
-                                  : nozzle.tankId?.fuelType === "DIESEL"
-                                    ? "blue"
-                                    : "green"
-                              }
-                            >
-                              {nozzle.tankId?.fuelType || "Tank"}
+                          <MdOutlineLocalGasStation className="text-xl" />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="truncate text-base font-bold text-slate-800">
+                            {machine.name}
+                          </h3>
+                          <p className="text-xs text-muted font-medium mt-0.5">
+                            Machine No. {machine.machineNumber}
+                          </p>
+                          <div className="mt-2.5 flex items-center gap-2">
+                            <Badge tone={machine.isActive ? "green" : "red"}>
+                              {machine.isActive ? "Active" : "Inactive"}
                             </Badge>
-                            <Badge
-                              tone={
-                                nozzle.isOccupied
-                                  ? "orange"
-                                  : nozzle.isActive
-                                    ? "green"
-                                    : "red"
+                            <Toggle
+                              checked={machine.isActive}
+                              onChange={(checked) =>
+                                toggleActive(machine, checked)
                               }
-                            >
-                              {nozzle.isOccupied
-                                ? "Occupied"
-                                : nozzle.isActive
-                                  ? "Active"
-                                  : "Inactive"}
-                            </Badge>
+                            />
                           </div>
                         </div>
-                      ))}
-                      {!machineNozzles.length && (
-                        <p className="text-sm text-muted py-2 select-none col-span-full">No nozzles added yet.</p>
-                      )}
+                      </div>
+
+                      {/* 2. Connected Nozzles */}
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
+                        <div className="flex flex-col text-sm">
+                          <span className="text-xs text-muted font-semibold uppercase tracking-wider select-none">
+                            Connected Nozzles
+                          </span>
+                          <strong className="text-slate-800 text-base font-bold mt-0.5">
+                            {machineNozzles.length} Nozzles
+                          </strong>
+                        </div>
+                      </div>
+
+                      {/* 3. Fuel Sold */}
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
+                        <div className="flex flex-col text-sm">
+                          <span className="text-xs text-muted font-semibold uppercase tracking-wider select-none">
+                            Fuel Sold ({periodLabel})
+                          </span>
+                          <strong className="text-slate-800 text-base font-bold mt-0.5">
+                            {number(fuelSoldVal, 2)} L
+                          </strong>
+                        </div>
+                      </div>
+
+                      {/* 4. Action Buttons */}
+                      <div className="flex gap-2 mt-1 md:mt-0">
+                        <Link
+                          to={`/admin/machines/${machine._id}`}
+                          className="btn-secondary px-3 text-brand"
+                          title="View Details"
+                        >
+                          <FiInfo />
+                        </Link>
+                        <button
+                          onClick={() => openEdit(machine)}
+                          className="btn-secondary px-3 text-brand"
+                          title="Edit Machine"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(machine)}
+                          className="btn-secondary px-3 text-red-500 hover:bg-red-50"
+                          title="Delete Machine"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </section>
-              );
-            })}
+
+                    {/* Nozzles Grid Area */}
+                    <div className="p-6 bg-white">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-sm font-semibold text-slate-700 select-none">
+                          Dispenser Nozzles
+                        </span>
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600 select-none">
+                          {machineNozzles.length}
+                        </span>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {machineNozzles.map((nozzle) => (
+                          <div
+                            key={nozzle._id}
+                            className="rounded-xl border border-slate-200/80 p-4 bg-white hover:shadow-xs transition"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <strong className="text-slate-800 font-bold text-sm">
+                                Nozzle {nozzle.nozzleNumber}
+                              </strong>
+                              <span className="text-xs font-bold text-slate-600">
+                                {number(nozzle.currentReading, 2)} L
+                              </span>
+                            </div>
+                            <div className="mt-3.5 flex flex-wrap gap-1.5">
+                              <Badge
+                                tone={
+                                  nozzle.tankId?.fuelType === "PREMIUM"
+                                    ? "purple"
+                                    : nozzle.tankId?.fuelType === "DIESEL"
+                                      ? "blue"
+                                      : "green"
+                                }
+                              >
+                                {nozzle.tankId?.fuelType || "Tank"}
+                              </Badge>
+                              <Badge
+                                tone={
+                                  nozzle.isOccupied
+                                    ? "orange"
+                                    : nozzle.isActive
+                                      ? "green"
+                                      : "red"
+                                }
+                              >
+                                {nozzle.isOccupied
+                                  ? "Occupied"
+                                  : nozzle.isActive
+                                    ? "Active"
+                                    : "Inactive"}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                        {!machineNozzles.length && (
+                          <p className="text-sm text-muted py-2 select-none col-span-full">
+                            No nozzles added yet.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </section>
+                );
+              })}
             {!filtered.length && (
               <p className="p-8 text-center text-muted">No machines found.</p>
             )}

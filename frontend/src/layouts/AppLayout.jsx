@@ -186,11 +186,11 @@ export default function AppLayout({ role = "admin" }) {
       <div
         className={`min-w-0 flex-1 transition-all duration-300 ${desktopSidebarExpanded ? "lg:pl-[290px]" : "lg:pl-[90px]"}`}
       >
-        <header className="sticky top-0 z-20 flex h-[92px] items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur lg:px-10">
+        <header className="sticky top-0 z-20 flex h-16 lg:h-[92px] items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur lg:px-10">
           <button
             ref={menuBtnRef}
             onClick={() => setSidebarOpen(true)}
-            className="text-3xl text-ink lg:hidden"
+            className="text-2xl text-ink lg:text-3xl lg:hidden"
             aria-label="Open sidebar"
           >
             <FiMenu />
@@ -200,10 +200,11 @@ export default function AppLayout({ role = "admin" }) {
 
             <button
               onClick={handleLogout}
-              className="btn-secondary flex items-center gap-2 text-red-500 hover:bg-red-50 hover:text-red-600 transition px-4 py-2.5"
+              className="btn-secondary flex items-center gap-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 transition px-2.5 py-1.5 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold"
+              title="Logout"
             >
-              <FiLogOut className="text-lg" />
-              <span className="font-semibold text-sm">Logout</span>
+              <FiLogOut className="text-sm sm:text-lg" />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </header>
