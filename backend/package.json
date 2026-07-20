@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon index.js"
   },
-  "author": "",
+  "author": "Shubham Dhapola",
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^2.12.0",
